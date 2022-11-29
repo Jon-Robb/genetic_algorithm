@@ -24,7 +24,7 @@ if __name__ == '__main__':
     
     # ajout de vos panneaux de résolution de problème
     # -------------------------------------------------------- par exemple
-    ga_app.add_solution_panel(BoxParameters())
+    # ga_app.add_solution_panel(BoxParameters()dans exemple.py)
     # ga_app.add_solution_panel(probleme_2)
     # ga_app.add_solution_panel(probleme_3)
 

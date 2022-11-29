@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 import gacvm
 import uqtwidgets
 
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
@@ -16,6 +15,8 @@ from PySide6.QtWidgets import  (QApplication, QMainWindow, QWidget,
                                 QGridLayout, QHBoxLayout, QVBoxLayout, QFormLayout, QSizePolicy,
                                 QMessageBox)
 from PySide6.QtGui import QImage, QPixmap, QIcon, QPainter, QFont, QPen, QBrush, QColor
+
+
 
 
 from __feature__ import snake_case, true_property
@@ -516,7 +517,7 @@ class QSolutionPanels(QTabWidget):
 
             description_button = QPushButton('Description')
             description_button.size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-            label = QLabel(solution_panel.summary)
+            label = QLabel(str(solution_panel.summary))
             label.word_wrap = True
             summary_group_box = QGroupBox('Summary')
             summary_group_box.size_policy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
@@ -546,7 +547,7 @@ class QSolutionPanels(QTabWidget):
         # if not isinstance(solution_panel, QSolutionToSolvePanel):
         #     raise ValueError('Invalid input parameters in SolutionPanels.add_solution_panel : panel must be a SolutionToSolvePanel object.')
 
-        self.add_tab(QSolutionPanels._TabWidget(solution_panel), solution_panel.name)
+        self.add_tab(QSolutionPanels._TabWidget(solution_panel), str(solution_panel.name))
         self.currentChanged.connect(lambda : solution_panel._update_from_simulation(None))
 
     @Slot()

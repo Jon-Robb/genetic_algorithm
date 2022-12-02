@@ -16,7 +16,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     description="A description",
                     problem_definition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
                                                                             names=("x", "y", "z")),
-                                                                            fitness=fitness_method()),
+                                                                            fitness=fitness_method),
                     default_parameters=Parameters(),
                     parent=None):
 
@@ -69,11 +69,12 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     pass
 
 class QxVerticalControlPanel(QGroupBox):
-    def __init__(self, menus:list[QWidget]=None, width:int=None, parent=None):
-        super().__init__(parent, layout=QVBoxLayout())
+    def __init__(self, layout=QVBoxLayout(), menus:list[QWidget]=None, width:int=None, parent=None):
+        super().__init__(parent)
 
         self.__q_widgets = []
-
+        self.set_layout(layout)
+        
         if menus is not None:
             for i, q_widget in enumerate(menus):
                 self.__q_widgets.append(q_widget)

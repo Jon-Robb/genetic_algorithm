@@ -69,11 +69,11 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
 
         self.__layout = QHBoxLayout(self)
 
-        # self.__qx_vertical_control_panel = QxVerticalControlPanel()
-        # self.__qx_visualization_panel = QxVisualizationPanel()
+        self.__qx_vertical_control_panel = QxVerticalControlPanel()
+        self.__qx_visualization_panel = QxVisualizationPanel()
 
-        # self.__layout.add_widget(self.__qx_vertical_control_panel)
-        # self.__layout.add_widget(self.__qx_visualization_panel)
+        self.__layout.add_widget(self.__qx_vertical_control_panel)
+        self.__layout.add_widget(self.__qx_visualization_panel)
 
     @property
     def name(self):
@@ -121,8 +121,10 @@ class QxVisualizationPanel(QGroupBox):
         super().__init__(parent)
 
         self.__layout = QVBoxLayout(self)
-
-        self.__canvas = QPixmap(500, 500)
+        self.__size = (self.screen().size().width(), self.screen().size().height())
+        pass
+        self.__canvas = QPixmap(self.__size)
+        pass
         self.__canvas.fill(Qt.black)
         self.__canvas_box = QLabel(pixmap=self.__canvas)
         self.__layout.add_widget(self.__canvas_box)

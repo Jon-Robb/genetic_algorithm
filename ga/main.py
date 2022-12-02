@@ -2,6 +2,8 @@ import sys
 from jaat_components import *
 import gaapp
 
+
+
 from gaapp import QSolutionToSolvePanel
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -28,7 +30,8 @@ def main():
     # ga_app.add_solution_panel(probleme_3)
     # --------------------------------------------------------
     # <Votre code ici>
-    test_panel = QxSolutionPanelFrame()
+    
+    test_panel = BoxProblemSolutionFramePanel()
     ga_app.add_solution_panel(test_panel)
 
     # open_box_problem = QxOpenBoxPanel()

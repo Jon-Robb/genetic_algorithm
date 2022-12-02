@@ -1,11 +1,10 @@
 from abc import abstractmethod
-from gacvm import Domains, Parameters, ProblemDefinition
+from gacvm import Domains, Parameters, ProblemDefinition, MutationStrategy
 from gaapp import QSolutionToSolvePanel
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 import numpy as np
-import sys
 
 #    _____           _     _                    
 #   |  __ \         | |   | |                   
@@ -75,7 +74,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     description : str="A description",
                     problem_definition : ProblemDefinition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
                                                                                                 names=("x", "y", "z")),
-                                                                                fitness=Problem()),
+                                                                                fitness=OpenBoxProblem(50, 100)),
                     default_parameters : Parameters=Parameters(),
                     parent : QWidget=None):
 
@@ -116,6 +115,8 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         return self.__parameters
 
     def _update_from_simulation(self, ga=None):
+        if ga is None:
+            return 
         pass
 class QxImageCloningPanel(QxSolutionPanelFrame):
     pass
@@ -141,13 +142,45 @@ class QxVisualizationPanel(QGroupBox):
         super().__init__(parent)
 
         self.__layout = QVBoxLayout(self)
-        self.__size = (self.screen().size().width(), self.screen().size().height())
-        pass
-        self.__canvas = QPixmap(self.__size)
-        pass
+        self.__canvas = QPixmap(300,300)
         self.__canvas.fill(Qt.black)
         self.__canvas_box = QLabel(pixmap=self.__canvas)
         self.__layout.add_widget(self.__canvas_box)
+
+#      _____ _             _             _           
+#     / ____| |           | |           (_)          
+#    | (___ | |_ _ __ __ _| |_ ___  __ _ _  ___  ___ 
+#     \___ \| __| '__/ _` | __/ _ \/ _` | |/ _ \/ __|
+#     ____) | |_| | | (_| | ||  __/ (_| | |  __/\__ \
+#    |_____/ \__|_|  \__,_|\__\___|\__, |_|\___||___/
+#                                   __/ |            
+#                                  |___/             
+class DoubleGeneMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, deux gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Mutate Two Genes'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                index1 = self._rng.integers(0, offsprings.shape[1])
+                index2 = self._rng.integers(0, offsprings.shape[1])
+                while index1 == index2:
+                    index2 = self._rng.integers(0, offsprings.shape[1])
+                offspring[index1] = domains.random_value(index1)
+                offspring[index2] = domains.random_value(index2)
+
+        
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+
+
 
 if __name__ == "__main__":
 

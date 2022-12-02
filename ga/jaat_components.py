@@ -11,14 +11,14 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         return "A fitness method"
 
     def __init__(   self,
-                    name="A name",
-                    summary="A summary",
-                    description="A description",
-                    problem_definition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
-                                                                            names=("x", "y", "z")),
-                                                            fitness=fitness_method),
-                    default_parameters=Parameters(),
-                    parent=None):
+                    name : str="A name",
+                    summary : str="A summary",
+                    description : str="A description",
+                    problem_definition : ProblemDefinition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
+                                                                                names=("x", "y", "z")),
+                                                                                fitness=fitness_method),
+                    default_parameters : Parameters=Parameters(),
+                    parent : QWidget=None):
 
         super().__init__(parent)
 
@@ -26,7 +26,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         self.__summary = summary
         self.__description = description
         self.__problem_definition = problem_definition
-        self.__default_parameters = default_parameters
+        self.__parameters = default_parameters
 
         self.__layout = QHBoxLayout(self)
 

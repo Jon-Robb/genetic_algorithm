@@ -8,14 +8,17 @@ import numpy as np
 class QxSolutionPanelFrame(QSolutionToSolvePanel):
 
     def fitness_method():
-        pass
+        return "A fitness method"
 
     def __init__(   self,
                     name="A name",
                     summary="A summary",
                     description="A description",
-                    problem_definition=ProblemDefinition(domains=Domains(ranges=np.zeros((3,2)), names=("x", "y", "z")), fitness=fitness_method()),
-                    default_parameters=Parameters(), parent=None):
+                    problem_definition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
+                                                                            names=("x", "y", "z")),
+                                                                            fitness=fitness_method()),
+                    default_parameters=Parameters(),
+                    parent=None):
 
         super().__init__(parent)
 
@@ -48,7 +51,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         def _update_from_simulation(self, ga=None):
             pass
 
-        self.__layout = QHBoxLayout()
+        self.__layout = QHBoxLayout(self)
 
         self.__qx_vertical_control_panel = QxVerticalControlPanel()
         self.__qx_visualization_panel = QxVisualizationPanel()
@@ -81,7 +84,7 @@ class QxVisualizationPanel(QGroupBox):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.__layout = QVBoxLayout()
+        self.__layout = QVBoxLayout(self)
 
         self.__canvas = QPixmap(500, 500)
         self.__canvas.fill(Qt.black)

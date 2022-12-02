@@ -113,7 +113,6 @@ class QxVerticalControlPanel(QGroupBox):
         if menus is not None:
             for i, q_widget in enumerate(menus):
                 self.__q_widgets.append(q_widget)
-                #q_widget.setFixedWidth(width)
                 self.__layout.add_widget(self.__q_widgets[i])
         self.__layout.add_stretch(1)
         
@@ -272,10 +271,38 @@ class BoxProblemSolutionFramePanel(QxSolutionPanelFrame):
 
         super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel,self.__qx_visualization_panel, parent)
     
+ 
+class QxForm(QWidget):
+    def __init__(self, title_widget:list[(str,QWidget)]=None, parent=None):
+        super().__init__(parent)
+        
+        self.__form_layout = QFormLayout(self)
+        
+        if title_widget is not None:
+            for title, widget in title_widget:
+                self.__form_layout.add_row(title, widget)
+        
+class LogoProblemSolutionFramePanel(QxSolutionPanelFrame):
+    
+     def __init__(self, name: str = "Logo Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxProblem()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
+        self.__form_list = [("Width",QLabel("650")),("Height",QLabel("500"))]
         
+        self.__form_layout = QxForm(self.__form_list)
+        
+        # self.__form.add_row("Width", QLabel("650"))
+        # self.__form.add_row("Height", QLabel("500"))
+        # self.__widget.set_layout(self.__form)
+        self.__menu = [self.__form_layout]
+        
+        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
+        self.__qx_visualization_panel  = QxVisualizationPanel()
 
+
+
+        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
+    
 class QxVisualizationPanel(QGroupBox):
     
     def __init__(self, parent=None, title="Visualisation"):

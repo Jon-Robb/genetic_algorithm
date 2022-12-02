@@ -5,7 +5,6 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 import numpy as np
-from exemple import *
 
 class ScrollValue(QWidget):
     
@@ -55,7 +54,7 @@ class ScrollValue(QWidget):
     
 
     def update(self, value:int):
-        self.__value_label.setNum(value * self.__step_value)
+        self.__value_label.set_num(value * self.__step_value)
 
     @Slot()
     def set_value(self, value):

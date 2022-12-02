@@ -31,8 +31,8 @@ def main():
     # --------------------------------------------------------
     # <Votre code ici>
     
-    test_panel = BoxProblemSolutionFramePanel()
-    ga_app.add_solution_panel(test_panel)
+    box_problem_solution_panel = BoxProblemSolutionFramePanel()
+    ga_app.add_solution_panel(box_problem_solution_panel)
 
     # open_box_problem = QxOpenBoxPanel()
     # shape_transformation_problem = QxShapeTransformationPanel()

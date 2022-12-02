@@ -91,11 +91,21 @@ class ScrollValue(QWidget):
     @sb.setter
     def sb(self, val):
         self.__sb = val
+        
+class ScrollValueButton(ScrollValue):
+    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = None, parent=None, step_value: int = 1):
+        super().__init__(title, range, fixed_widget_length, init, parent, step_value)
+        self.__button = QPushButton("!");
+        self.__button.set_fixed_width(fixed_widget_length/2)
+        # self.__button.tool_tip = f'Reset to default value : {value_prefix}{init_val:{format_string}}{value_suffix}'
+        self.__button.tool_tip = f'Reset to default value : {init}'
+        self.layout().add_widget(self.__button)
 
 class QxVerticalControlPanel(QGroupBox):
-    def __init__(self, layout=QVBoxLayout(), menus:list[QWidget]=None, width:int=None, parent=None):
+    def __init__(self, layout=QVBoxLayout(),title="Paramètres", menus:list[QWidget]=None, width:int=None, parent=None):
         super().__init__(parent)
 
+        self.title = title
         self.__q_widgets = []
         self.__layout = layout
         self.set_layout(layout)
@@ -105,7 +115,8 @@ class QxVerticalControlPanel(QGroupBox):
                 self.__q_widgets.append(q_widget)
                 #q_widget.setFixedWidth(width)
                 self.__layout.add_widget(self.__q_widgets[i])
-
+        self.__layout.add_stretch(1)
+        
 class QxVisualizationPanel(QGroupBox):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -249,8 +260,8 @@ class BoxProblemSolutionFramePanel(QxSolutionPanelFrame):
 
     def __init__(self, name: str = "Box Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxProblem()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
         self.__menu = []
-        self.__widthscrollbar = ScrollValue("Width", (0, 100),50, 50)
-        self.__heightscrollbar = ScrollValue("Height", (0, 100),50, 50)
+        self.__widthscrollbar = ScrollValueButton("Width", (0, 100),50, 50)
+        self.__heightscrollbar = ScrollValueButton("Height", (0, 100),50, 50)
         self.__menu.append(self.__widthscrollbar)
         self.__menu.append(self.__heightscrollbar)
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
@@ -267,11 +278,11 @@ class BoxProblemSolutionFramePanel(QxSolutionPanelFrame):
 
 class QxVisualizationPanel(QGroupBox):
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title="Visualisation"):
         super().__init__(parent)
 
         self.__layout = QVBoxLayout(self)
-    
+        self.title = title
         
         self.__canvas = QPixmap(750,500)
         

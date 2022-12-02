@@ -16,7 +16,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     description="A description",
                     problem_definition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
                                                                             names=("x", "y", "z")),
-                                                                            fitness=fitness_method),
+                                                            fitness=fitness_method),
                     default_parameters=Parameters(),
                     parent=None):
 
@@ -28,36 +28,36 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         self.__problem_definition = problem_definition
         self.__default_parameters = default_parameters
 
-        @property
-        def name(self):
-            return self.__name
-
-        @property
-        def summary(self):
-            return self.__summary
-    
-        @property
-        def description(self):
-            return self.__description
-
-        @property
-        def problem_definition(self):
-            return self.__problem_definition
-
-        @property
-        def default_parameters(self):
-            return self.__parameters
-
-        def _update_from_simulation(self, ga=None):
-            pass
-
         self.__layout = QHBoxLayout(self)
 
-        self.__qx_vertical_control_panel = QxVerticalControlPanel()
-        self.__qx_visualization_panel = QxVisualizationPanel()
+        # self.__qx_vertical_control_panel = QxVerticalControlPanel()
+        # self.__qx_visualization_panel = QxVisualizationPanel()
 
-        self.__layout.add_widget(self.__qx_vertical_control_panel)
-        self.__layout.add_widget(self.__qx_visualization_panel)
+        # self.__layout.add_widget(self.__qx_vertical_control_panel)
+        # self.__layout.add_widget(self.__qx_visualization_panel)
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def summary(self):
+        return self.__summary
+
+    @property
+    def description(self):
+        return self.__description
+
+    @property
+    def problem_definition(self):
+        return self.__problem_definition
+
+    @property
+    def default_parameters(self):
+        return self.__parameters
+
+    def _update_from_simulation(self, ga=None):
+        pass
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     pass

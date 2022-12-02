@@ -20,13 +20,14 @@ class Problem():
 
     def __call__(self):
         return self.fitness()
+
 class OpenBoxProblem(Problem):
     def __init__(self, width, length):
         self.__width = width
         self.__length = length
         self.__height = 0
 
-    def fitness(self, cut_length):
+    def fitness(self, cut_length:float = 0) -> float:
         self.__width -= 2 * cut_length
         self.__length -= 2 * cut_length
         self.__height = cut_length
@@ -34,8 +35,27 @@ class OpenBoxProblem(Problem):
 
     def __call__(self, cut_length):
         return self.fitness(cut_length)
+    
+    @property
+    def width(self):
+        return self.__width
+    
+    @property
+    def length(self):
+        return self.__length
+    
+    @width.setter
+    def width(self, width):
+        self.__width = width
+        
+    @length.setter
+    def length(self, length):
+        self.__length = length
+
+
 class ShapeTransformationProblem(Problem):
     pass
+
 class ImageCloningProblem(Problem):
     pass
 

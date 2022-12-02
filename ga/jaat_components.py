@@ -183,7 +183,10 @@ class QxVisualizationPanel(QGroupBox):
         super().__init__(parent)
 
         self.__layout = QVBoxLayout(self)
-        self.__canvas = QPixmap(300, 300)
+    
+        
+        self.__canvas = QPixmap(750,500)
+        
         self.__canvas.fill(Qt.black)
         self.__canvas_box = QLabel(pixmap=self.__canvas)
         self.__layout.add_widget(self.__canvas_box)

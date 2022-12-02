@@ -22,7 +22,7 @@ from PySide6.QtGui import QImage, QPixmap, QIcon, QPainter, QFont, QPen, QBrush,
 from __feature__ import snake_case, true_property
 
 
-
+QtWidgets.QFileDialog.getSaveFileName = QtWidgets.QFileDialog.get_save_file_name
 
 
 

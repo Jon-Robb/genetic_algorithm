@@ -133,7 +133,7 @@ class Problem():
         return self.fitness()
 
 class OpenBoxProblem(Problem):
-    def __init__(self, width, length):
+    def __init__(self, width=50, length=100):
         self.__width = width
         self.__length = length
         self.__height = 0
@@ -190,7 +190,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     description : str="A description",
                     problem_definition : ProblemDefinition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
                                                                                                 names=("x", "y", "z")),
-                                                                                fitness=OpenBoxProblem(50, 100)),
+                                                                                fitness=Problem()),
                     default_parameters : Parameters=Parameters(),
                     vertical_control_panel : QxVerticalControlPanel=None,
                     visualisation_panel : QxVisualizationPanel=None,
@@ -245,9 +245,9 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
 
 
 class BoxProblemSolutionFramePanel(QxSolutionPanelFrame):
-    def fitness_method():
-        return "A fitness method"
-    def __init__(self, name: str = "Box Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=fitness_method), default_parameters: Parameters = Parameters(), parent: QWidget = None):
+
+
+    def __init__(self, name: str = "Box Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxProblem()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
         self.__menu = []
         self.__widthscrollbar = ScrollValue("Width", (0, 100),50, 50)
         self.__heightscrollbar = ScrollValue("Height", (0, 100),50, 50)

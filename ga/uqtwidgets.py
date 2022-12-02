@@ -48,7 +48,7 @@ def create_scroll_int_value(min_val, init_val, max_val, value_prefix = "", value
     update_function = lambda value: setattr(value_label, 'text', f'{value_prefix}{value}{value_suffix}')
     update_function(init_val)
     scroll_bar.valueChanged.connect(update_function)
-    default_button.clicked.connect(lambda : (scroll_bar.setValue(init_val)))
+    default_button.clicked.connect(lambda : setattr(scroll_bar, "value", init_val))
 
     return scroll_bar, layout
 

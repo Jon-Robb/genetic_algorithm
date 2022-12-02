@@ -1,3 +1,6 @@
+from PySide6.QtWidgets import *
+from PySide6.QtCore import *
+from __feature__ import snake_case, true_property
 class ScrollValue(QWidget):
     
     valueChanged = Signal(int)
@@ -83,28 +86,3 @@ class ScrollValue(QWidget):
     @sb.setter
     def sb(self, val):
         self.__sb = val
-class BoxParameters(QSolutionToSolvePanel):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        
-        self.__layout = QVBoxLayout()
-        self.__width_scrollbar = ScrollValue('Width', (0, 100), 50, 50)
-        self.__height_scrollbar = ScrollValue('Height', (0, 100), 50, 50)
-        self.__layout.add_widget(self.__width_scrollbar)
-        self.__layout.add_widget(self.__height_scrollbar)
-        self.set_layout(self.__layout)
-        
-    def summary(self):
-        return "Un esti de problème de malade dans tête"
-        
-    def name(self):
-        return "Box Parameters"
-    
-    def description(self):
-        return "Ouvrez la boite et vous verrez"	
-    
-    def default_parameters(self):
-        pass
-    
-    def update_solution(self):
-        pass

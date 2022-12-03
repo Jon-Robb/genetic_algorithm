@@ -35,20 +35,23 @@ class FE():
         return self.fitness()
 
 class OpenBoxFE(FE):
+
     def __init__(self, width=50, length=100):
         self.__width = width
         self.__length = length
-        self.__height = 0
-
-    def fitness(self, cut_length:float = 0) -> float:
-        self.__width -= 2 * cut_length
-        self.__length -= 2 * cut_length
-        self.__height = cut_length
-        return self.__width * self.__length * self.__height
 
     def __call__(self, cut_length):
-        return self.fitness(cut_length)
-    
+        self.fitness_evaluation(cut_length)
+
+    def fitness_evaluation(self, cut_length):
+        width = self.__width
+        length = self.__length
+        cut_length = cut_length[0]
+        width -= 2 * cut_length
+        length -= 2 * cut_length
+        height = cut_length
+        volume = width * length * height
+        return volume
     @property
     def width(self):
         return self.__width
@@ -345,7 +348,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
                     name: str = "Box Problem",
                     summary: str = "A summary",
                     description: str = "A description",
-                    problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float16),
+                    problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float64),
                                                                                                 names=("Volume", )),
                                                                                 fitness=OpenBoxFE()),
                     default_parameters: Parameters = Parameters(),
@@ -399,5 +402,5 @@ if __name__ == "__main__":
     print(p())
 
     obp = OpenBoxFE(10, 10)
-    print(obp(5))
+    print(obp((5,0)))
 # ------------------------------------------------------------------------------------------ 

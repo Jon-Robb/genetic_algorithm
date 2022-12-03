@@ -41,7 +41,7 @@ class OpenBoxFE(FE):
         self.__length = length
 
     def __call__(self, cut_length):
-        self.fitness_evaluation(cut_length)
+        return self.fitness_evaluation(cut_length)
 
     def fitness_evaluation(self, cut_length):
         width = self.__width
@@ -51,7 +51,7 @@ class OpenBoxFE(FE):
         length -= 2 * cut_length
         height = cut_length
         volume = float(width * length * height)
-        return round(volume,2)
+        return volume
 
     @property
     def width(self):

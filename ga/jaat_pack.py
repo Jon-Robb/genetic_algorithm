@@ -224,11 +224,21 @@ class ScrollValue(QWidget):
     @sb.setter
     def sb(self, val):
         self.__sb = val
+        
+class ScrollValueButton(ScrollValue):
+    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = None, parent=None, step_value: int = 1):
+        super().__init__(title, range, fixed_widget_length, init, parent, step_value)
+        self.__button = QPushButton("!");
+        self.__button.set_fixed_width(fixed_widget_length/2)
+        # self.__button.tool_tip = f'Reset to default value : {value_prefix}{init_val:{format_string}}{value_suffix}'
+        self.__button.tool_tip = f'Reset to default value : {init}'
+        self.layout().add_widget(self.__button)
 
 class QxVerticalControlPanel(QGroupBox):
-    def __init__(self, layout=QVBoxLayout(), menus:list[QWidget]=None, width:int=None, parent=None):
+    def __init__(self, layout=QVBoxLayout(),title="Paramètres", menus:list[QWidget]=None, width:int=None, parent=None):
         super().__init__(parent)
 
+        self.title = title
         self.__q_widgets = []
         self.__layout = layout
         self.set_layout(layout)
@@ -236,9 +246,9 @@ class QxVerticalControlPanel(QGroupBox):
         if menus is not None:
             for i, q_widget in enumerate(menus):
                 self.__q_widgets.append(q_widget)
-                #q_widget.setFixedWidth(width)
                 self.__layout.add_widget(self.__q_widgets[i])
-
+        self.__layout.add_stretch(1)
+        
 class QxVisualizationPanel(QGroupBox):
     
     def __init__(self, parent=None):
@@ -253,6 +263,17 @@ class QxVisualizationPanel(QGroupBox):
         self.__canvas.fill(Qt.black)
         self.__canvas_box = QLabel(pixmap=self.__canvas)
         self.__layout.add_widget(self.__canvas_box)
+
+class QxForm(QWidget):
+    def __init__(self, title_widget:list[(str,QWidget)]=None, parent=None):
+        super().__init__(parent)
+        
+        self.__form_layout = QFormLayout(self)
+        
+        if title_widget is not None:
+            for title, widget in title_widget:
+                self.__form_layout.add_row(title, widget)
+        
 # ------------------------------------------------------------------------------------------ 
 #   _____                                             _       
 #  / ____|                                           | |      
@@ -334,8 +355,8 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
                     parent: QWidget = None):
 
         self.__menu = []
-        self.__widthscrollbar = ScrollValue("Width", (0, 100),50, 50)
-        self.__heightscrollbar = ScrollValue("Height", (0, 100),50, 50)
+        self.__widthscrollbar = ScrollValueButton("Width", (0, 100),50, 50)
+        self.__heightscrollbar = ScrollValueButton("Height", (0, 100),50, 50)
         self.__menu.append(self.__widthscrollbar)
         self.__menu.append(self.__heightscrollbar)
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
@@ -345,9 +366,29 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
 
 
         super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel,self.__qx_visualization_panel, parent)
+
+class LogoProblemSolutionFramePanel(QxSolutionPanelFrame):
     
-class QxShapeTransformationPanel(QxSolutionPanelFrame):
-    pass
+     def __init__(self, name: str = "Logo Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxProblem()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
+        
+        
+        self.__form_list = [("Width",QLabel("650")),("Height",QLabel("500"))]
+        
+        self.__form_layout = QxForm(self.__form_list)
+        
+        # self.__form.add_row("Width", QLabel("650"))
+        # self.__form.add_row("Height", QLabel("500"))
+        # self.__widget.set_layout(self.__form)
+        self.__menu = [self.__form_layout]
+        
+        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
+        self.__qx_visualization_panel  = QxVisualizationPanel()
+
+
+
+        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
+    
+
 # ------------------------------------------------------------------------------------------ 
 #  _______        _   _             
 # |__   __|      | | (_)            

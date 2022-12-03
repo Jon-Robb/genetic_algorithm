@@ -25,8 +25,8 @@ def main():
     
     # --------------------------------------------------------
     # ajout de vos panneaux de résolution de problème (exemple) :
-    ga_app.add_solution_panel(BoxProblemSolutionFramePanel())
-    ga_app.add_solution_panel(LogoProblemSolutionFramePanel())
+    ga_app.add_solution_panel(QxOpenBoxPanel())
+    ga_app.add_solution_panel(QxShapeTransformationPanel())
     # ga_app.add_solution_panel(probleme_3)
     # --------------------------------------------------------
     # <Votre code ici>

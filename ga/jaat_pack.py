@@ -19,14 +19,14 @@ import numpy as np
 # | '--------------' |
 #  '----------------' 
 # ------------------------------------------------------------------------------------------ 
-#  _____           _     _                    
-# |  __ \         | |   | |                   
-# | |__) | __ ___ | |__ | | ___ _ __ ___  ___ 
-# |  ___/ '__/ _ \| '_ \| |/ _ \ '_ ` _ \/ __|
-# | |   | | | (_) | |_) | |  __/ | | | | \__ \
-# |_|   |_|  \___/|_.__/|_|\___|_| |_| |_|___/  
+#  ______ _ _                         ______          _             _   _             
+# |  ____(_) |                       |  ____|        | |           | | (_)            
+# | |__   _| |_ _ __   ___  ___ ___  | |____   ____ _| |_   _  __ _| |_ _  ___  _ __  
+# |  __| | | __| '_ \ / _ \/ __/ __| |  __\ \ / / _` | | | | |/ _` | __| |/ _ \| '_ \ 
+# | |    | | |_| | | |  __/\__ \__ \ | |___\ V / (_| | | |_| | (_| | |_| | (_) | | | |
+# |_|    |_|\__|_| |_|\___||___/___/ |______\_/ \__,_|_|\__,_|\__,_|\__|_|\___/|_| |_| 
 # ------------------------------------------------------------------------------------------                                                                 
-class Problem():
+class FE():
 
     def fitness(self):
         return "A fitness method"
@@ -34,7 +34,7 @@ class Problem():
     def __call__(self):
         return self.fitness()
 
-class OpenBoxProblem(Problem):
+class OpenBoxFE(FE):
     def __init__(self, width=50, length=100):
         self.__width = width
         self.__length = length
@@ -61,18 +61,14 @@ class OpenBoxProblem(Problem):
     def width(self, width):
         self.__width = width
         
-
-        self.__canvas.fill(Qt.black)
-        self.__canvas_box = QLabel(pixmap=self.__canvas)
-        self.__layout.add_widget(self.__canvas_box)
     @length.setter
     def length(self, length):
         self.__length = length
 
-class ShapeTransformationProblem(Problem):
+class ShapeTransformationFE(FE):
     pass
 
-class ImageCloningProblem(Problem):
+class ImageCloningFE(FE):
     pass
 # ------------------------------------------------------------------------------------------ 
 #   _____ _             _             _           
@@ -195,7 +191,7 @@ class ScrollValue(QWidget):
         
     @property
     def value(self):
-        return self.__sb.value()
+        return self.__sb.value
     
     @value.setter
     def value(self, val):
@@ -258,10 +254,11 @@ class QxVisualizationPanel(QGroupBox):
         self.__layout.content_margins = (0, 0, 0, 0)
 
         
-        self.__canvas = QPixmap(self.width, self.height)
+        self.__canvas = QPixmap(self.width * 0.5, self.height * 0.5)
         
         self.__canvas.fill(Qt.black)
         self.__canvas_box = QLabel(pixmap=self.__canvas)
+        self.__canvas_box.alignment = Qt.AlignCenter
         self.__layout.add_widget(self.__canvas_box)
 
 class QxForm(QWidget):
@@ -292,7 +289,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     description : str="A description",
                     problem_definition : ProblemDefinition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
                                                                                                 names=("x", "y", "z")),
-                                                                                fitness=Problem()),
+                                                                                fitness=FE()),
                     default_parameters : Parameters=Parameters(),
                     vertical_control_panel : QxVerticalControlPanel=None,
                     visualisation_panel : QxVisualizationPanel=None,
@@ -348,9 +345,9 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
                     name: str = "Box Problem",
                     summary: str = "A summary",
                     description: str = "A description",
-                    problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.zeros((1, 2)),
+                    problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float16),
                                                                                                 names=("Volume", )),
-                                                                                fitness=OpenBoxProblem()),
+                                                                                fitness=OpenBoxFE()),
                     default_parameters: Parameters = Parameters(),
                     parent: QWidget = None):
 
@@ -360,16 +357,13 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__menu.append(self.__widthscrollbar)
         self.__menu.append(self.__heightscrollbar)
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
-
         self.__qx_visualization_panel  = QxVisualizationPanel()
-
-
-
         super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel,self.__qx_visualization_panel, parent)
+        # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
-class LogoProblemSolutionFramePanel(QxSolutionPanelFrame):
+class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
-     def __init__(self, name: str = "Logo Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxProblem()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
+     def __init__(self, name: str = "Logo Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxFE()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
         self.__form_list = [("Width",QLabel("650")),("Height",QLabel("500"))]
@@ -401,9 +395,9 @@ class LogoProblemSolutionFramePanel(QxSolutionPanelFrame):
 # ------------------------------------------------------------------------------------------ 
 if __name__ == "__main__":
 
-    p = Problem()
+    p = FE()
     print(p())
 
-    obp = OpenBoxProblem(10, 10)
+    obp = OpenBoxFE(10, 10)
     print(obp(5))
 # ------------------------------------------------------------------------------------------ 

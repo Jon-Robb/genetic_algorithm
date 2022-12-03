@@ -50,8 +50,9 @@ class OpenBoxFE(FE):
         width -= 2 * cut_length
         length -= 2 * cut_length
         height = cut_length
-        volume = width * length * height
-        return volume
+        volume = float(width * length * height)
+        return round(volume,2)
+
     @property
     def width(self):
         return self.__width
@@ -401,6 +402,6 @@ if __name__ == "__main__":
     p = FE()
     print(p())
 
-    obp = OpenBoxFE(10, 10)
-    print(obp((5,0)))
+    obp = OpenBoxFE(50, 100)
+    print(obp((14.25634434,0)))
 # ------------------------------------------------------------------------------------------ 

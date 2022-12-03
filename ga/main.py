@@ -1,5 +1,5 @@
 import sys
-from jaat_components import *
+from jaat_pack import *
 import gaapp
 
 
@@ -31,7 +31,7 @@ def main():
     # --------------------------------------------------------
     # <Votre code ici>
     
-    test_panel = BoxProblemSolutionFramePanel()
+    test_panel = QxOpenBoxPanel()
     ga_app.add_solution_panel(test_panel)
 
     # open_box_problem = QxOpenBoxPanel()

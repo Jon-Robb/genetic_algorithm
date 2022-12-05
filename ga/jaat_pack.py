@@ -347,8 +347,8 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
     
     def __init__(   self,
                     name: str = "Box Problem",
-                    summary: str = "A summary",
-                    description: str = "A description",
+                    summary: str = "Box problem summary",
+                    description: str = "Box problem description",
                     problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float64),
                                                                                                 names=("Volume", )),
                                                                                 fitness=OpenBoxFE()),
@@ -367,24 +367,55 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
 
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
-     def __init__(self, name: str = "Logo Problem", summary: str = "A summary", description: str = "A description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxFE()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
+     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxFE()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
-        self.__form_list = [("Width",QLabel("650")),("Height",QLabel("500"))]
+        self.__width_label = QLabel("650")
+        self.__height_label = QLabel("500")
         
-        self.__form_layout = QxForm(self.__form_list)
+        self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]     
+        self.__width_height_form_layout = QxForm(self.__form_list)
         
-        # self.__form.add_row("Width", QLabel("650"))
-        # self.__form.add_row("Height", QLabel("500"))
-        # self.__widget.set_layout(self.__form)
-        self.__menu = [self.__form_layout]
+        self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50)
+        self.__generate_obtacle_btn = QPushButton("Generate Obstacle")
+        
+        self.__shape_combobox = QComboBox()
+        self.__shape_combobox.add_items(["Circle","Rectangle","Triangle"])
+        self.__shape_combobox.set_fixed_width(250)
+        self.__shape_form_layout = QxForm([("Shape : ", self.__shape_combobox)])
+        
+        
+        self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
 
-
-
         super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
+        
+
+class QxImageCloningPanel(QxSolutionPanelFrame):
+    def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=FE()), default_parameters: Parameters = Parameters(), vertical_control_panel: QxVerticalControlPanel = None, visualisation_panel: QxVisualizationPanel = None, parent: QWidget = None):
+        
+        self.__width_label = QLabel("650")
+        self.__height_label = QLabel("500")
+        self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]
+        self.__width_height_form_layout = QxForm(self.__form_list)        
+        
+        self.__pixels_count_sb = ScrollValueButton("Pixels Count : ", (0, 1000),100, 500)
+        
+        self.__image_combobox = QComboBox()
+        self.__image_combobox.add_items(["Dali", "Picasso", "Van Gogh"])
+        self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
+        
+        self.__generate_img_btn = QPushButton("Generate Image")
+
+        self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__generate_img_btn]
+        
+        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
+        
+        self.__qx_visualization_panel  = QxVisualizationPanel()
+        
+        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
     
 
 # ------------------------------------------------------------------------------------------ 

@@ -392,6 +392,10 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.uint16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
+    @property
+    def problem_definition(self):
+        return ProblemDefinition(domains=Domains(ranges=np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), names=("Coupe", )), fitness=OpenBoxFE(self.__widthscrollbar.value, self.__heightscrollbar.value))
+
     def draw_on_canvas(self, data):
         img = QImage(400, 400, QImage.Format_ARGB32)
         img.fill(QColor(0,0,0))

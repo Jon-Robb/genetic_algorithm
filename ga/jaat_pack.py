@@ -387,9 +387,9 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
-        self.draw_on_canvas(100)
+        self.draw_on_canvas(50)
         
-        super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.uint16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
+        super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
     @property
@@ -397,13 +397,22 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         return ProblemDefinition(domains=Domains(ranges=np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), names=("Coupe", )), fitness=OpenBoxFE(self.__widthscrollbar.value, self.__heightscrollbar.value))
 
     def draw_on_canvas(self, data):
-        img = QImage(400, 400, QImage.Format_ARGB32)
-        img.fill(QColor(0,0,0))
+       
+        canvas_width = 400
+        canvas_height = 400
+        box_offset_x = canvas_width * 0.05
+        box_offset_y = canvas_height * 0.1
+        box_width = canvas_width * 0.9
+        box_height = canvas_height * 0.8
+        
+        img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
+        img.fill(QColor(0,0,0,0))
         painter = QPainter(img)
-        painter.fill_rect(0, 0, data, data, "red")
-        painter.fill_rect(400-data,0,data,data,"red")
-        painter.fill_rect(0,400-data,data,data,"red")
-        painter.fill_rect(400-data,400-data,data,data,"red")
+        painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
+        painter.fill_rect(box_offset_x, box_offset_y, data, data, "black")
+        painter.fill_rect(box_width-data+box_offset_x,box_offset_y,data,data,"black")
+        painter.fill_rect(box_offset_x,box_height + box_offset_y-data,data,data,"black")
+        painter.fill_rect(box_width-data+box_offset_x,box_height + box_offset_y- data, data,data,"black")
         self.__qx_visualization_panel.image = img 
         painter.end()
 

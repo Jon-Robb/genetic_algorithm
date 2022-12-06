@@ -48,7 +48,7 @@ def create_scroll_int_value(min_val, init_val, max_val, value_prefix = "", value
     update_function = lambda value: setattr(value_label, 'text', f'{value_prefix}{value}{value_suffix}')
     update_function(init_val)
     scroll_bar.valueChanged.connect(update_function)
-    default_button.clicked.connect(lambda : setattr(scroll_bar, "value", init_val))
+    default_button.clicked.connect(lambda : setattr(scroll_bar, 'value', init_val))
 
     return scroll_bar, layout
 
@@ -99,21 +99,23 @@ def create_scroll_real_value(min_val, init_val, max_val, precision, display_mult
 
 
 
-class QSimpleImage(QWidget):
-    '''Widget to show image always enabled'''
+class QImageViewer(QWidget):
+    '''Widget utility showing an image. The image is always enabled.'''
 
     image_changed = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.alignment = Qt.AlignCenter
+
         self._image = QImage(QSize(250,250), QImage.Format_ARGB32)
-        self._outline_color = QColor(0, 0, 0)
-        self._background_color = QColor(64, 64, 64)
+        
 
     @property
     def image(self):
         return self._image
+
     @image.setter
     def image(self, value):
         self._image = value
@@ -125,10 +127,17 @@ class QSimpleImage(QWidget):
     
     def paint_event(self, event):
         painter = QPainter(self)
-        painter.set_pen(self._outline_color)
-        painter.set_brush(self._background_color)
-        painter.draw_rect(self.rect)
-        painter.draw_image(QPointF((self.width - self._image.width())/2., (self.height - self._image.height())/2.), self._image)
+        painter.set_background(QBrush(QColor(64, 64, 64)))
+        painter.set_pen(Qt.NoPen)
+        # painter.set_pen(QPen(QColor(0, 0, 0), 1.))
+        painter.set_brush(Qt.NoBrush)
+        
+        painter.erase_rect(self.rect)
+        # painter.translate(self.rect.center())
+        image = self._image.scaled(self.size, Qt.KeepAspectRatio, Qt.FastTransformation)
+        painter.draw_image(QPointF((self.width - image.width())/2., (self.height - image.height())/2.), image)
         painter.end()
+
+
 
 

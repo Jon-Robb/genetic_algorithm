@@ -5,6 +5,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 import numpy as np
+from typing import Optional
 
 
 #  .----------------. 
@@ -235,13 +236,13 @@ class ScrollValueButton(ScrollValue):
         self.layout().add_widget(self.__button)
 
 class QxVerticalControlPanel(QGroupBox):
-    def __init__(self, layout=QVBoxLayout(),title="Paramètres", menus:list[QWidget]=None, width:int=None, parent=None):
+    def __init__(self, layout:Optional[QVBoxLayout]= None,title="Paramètres", menus:list[QWidget]=None, width:int=None, parent=None):
         super().__init__(parent)
 
         self.title = title
         self.__q_widgets = []
-        self.__layout = layout
-        self.set_layout(layout)
+        self.__layout = layout if layout else QVBoxLayout()
+        self.set_layout(self.__layout)
        
         if menus is not None:
             for i, q_widget in enumerate(menus):
@@ -301,6 +302,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
 
         super().__init__(parent)
 
+        
         self.__name = name
         self.__summary = summary
         self.__description = description
@@ -350,7 +352,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
                     summary: str = "Box problem summary",
                     description: str = "Box problem description",
                     problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float64),
-                                                                                                names=("Volume", )),
+                                                                                                names=("Coupe", )),
                                                                                 fitness=OpenBoxFE()),
                     default_parameters: Parameters = Parameters(),
                     parent: QWidget = None):
@@ -358,11 +360,14 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__menu = []
         self.__widthscrollbar = ScrollValueButton("Width", (0, 100),50, 50)
         self.__heightscrollbar = ScrollValueButton("Height", (0, 100),50, 50)
+        
         self.__menu.append(self.__widthscrollbar)
         self.__menu.append(self.__heightscrollbar)
+        
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
-        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel,self.__qx_visualization_panel, parent)
+        
+        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
 class QxShapeTransformationPanel(QxSolutionPanelFrame):

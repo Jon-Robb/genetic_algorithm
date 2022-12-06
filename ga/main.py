@@ -25,7 +25,7 @@ def main():
     
     # --------------------------------------------------------
     # ajout de vos panneaux de résolution de problème (exemple) :
-    ga_app.add_solution_panel(QxOpenBoxPanel())
+    # ga_app.add_solution_panel(QxOpenBoxPanel())
     # ga_app.add_solution_panel(QxShapeTransformationPanel())
     # ga_app.add_solution_panel(QxImageCloningPanel())
     # --------------------------------------------------------
@@ -39,12 +39,13 @@ def main():
 
     
 
-    # open_box_problem = QxOpenBoxPanel()
-    # shape_transformation_problem = QxShapeTransformationPanel()
-    # image_cloning_problem = QxImageCloningPanel()
-    # ga_app.add_solution_panel(open_box_problem)
-    # ga_app.add_solution_panel(shape_transformation_problem)
-    # ga_app.add_solution_panel(image_cloning_problem)
+    open_box_problem = QxOpenBoxPanel()
+    shape_transformation_problem = QxShapeTransformationPanel()
+    image_cloning_problem = QxImageCloningPanel()
+    
+    ga_app.add_solution_panel(open_box_problem)
+    ga_app.add_solution_panel(shape_transformation_problem)
+    ga_app.add_solution_panel(image_cloning_problem)
 
 
     ga_app.show()

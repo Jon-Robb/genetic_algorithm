@@ -31,14 +31,6 @@ def main():
     # --------------------------------------------------------
     # <Votre code ici>
     
-  
-    
-  
-
-
-
-    
-
     open_box_problem = QxOpenBoxPanel()
     shape_transformation_problem = QxShapeTransformationPanel()
     image_cloning_problem = QxImageCloningPanel()

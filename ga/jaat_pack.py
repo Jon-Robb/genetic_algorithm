@@ -28,12 +28,15 @@ from typing import Optional
 # |_|    |_|\__|_| |_|\___||___/___/ |______\_/ \__,_|_|\__,_|\__,_|\__|_|\___/|_| |_| 
 # ------------------------------------------------------------------------------------------                                                                 
 class FE():
+    
+    def __init_(self, parent_panel:type["QxSolutionPanelFrame"]):
+        self._parent_panel = parent_panel
 
     def fitness_evaluation(self):
         return "A fitness method"
 
-    def __call__(self, data: np.ndarray):
-        return self.fitness_evaluation(data)
+    def __call__(self):
+        return self.fitness_evaluation()
 
 class OpenBoxFE(FE):
 
@@ -293,22 +296,21 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     name : str="A name",
                     summary : str="A summary",
                     description : str="A description",
-                    problem_definition : ProblemDefinition=ProblemDefinition(   domains=Domains(ranges=np.zeros((3,2)),
-                                                                                                names=("x", "y", "z")),
-                                                                                fitness=FE()),
-                    default_parameters : Parameters=Parameters(),
+                    default_parameters : Optional[Parameters]=None,
+                    tmp_ranges : Optional[np.ndarray]=None,
                     vertical_control_panel : QxVerticalControlPanel=None,
                     visualisation_panel : QxVisualizationPanel=None,
                     parent : QWidget=None):
 
         super().__init__(parent)
-
         
         self.__name = name
         self.__summary = summary
         self.__description = description
-        self.__problem_definition = problem_definition
-        self.__parameters = default_parameters
+        
+        self.__tmp_ranges = np.zeros((3,2)) if tmp_ranges is None else tmp_ranges
+        
+        self.__parameters = Parameters() if default_parameters is None else default_parameters
 
         self.__layout = QHBoxLayout(self)
 
@@ -332,7 +334,7 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
 
     @property
     def problem_definition(self):
-        return self.__problem_definition
+        return ProblemDefinition(domains=Domains(ranges=self.__tmp_ranges, names=("x", "y", "z")), fitness=FE())
 
     @property
     def default_parameters(self):
@@ -352,15 +354,14 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
                     name: str = "Box Problem",
                     summary: str = "Box problem summary",
                     description: str = "Box problem description",
-                    problem_definition: ProblemDefinition = ProblemDefinition(  domains=Domains(ranges=np.asarray([[0, 25]], np.float64),
-                                                                                                names=("Coupe", )),
-                                                                                fitness=OpenBoxFE()),
-                    default_parameters: Parameters = Parameters(),
+                    default_parameters: Optional[Parameters] = None,
                     parent: QWidget = None):
 
         self.__menu = []
-        self.__widthscrollbar = ScrollValueButton("Width", (0, 100),50, 50)
-        self.__heightscrollbar = ScrollValueButton("Height", (0, 100),50, 50)
+        self.__widthscrollbar = ScrollValueButton("Width", (1, 100), 50, 50)
+        self.__heightscrollbar = ScrollValueButton("Height", (1, 100), 50, 50)
+        
+        self.__default_parameters = Parameters() if default_parameters is None else default_parameters
         
         self.__menu.append(self.__widthscrollbar)
         self.__menu.append(self.__heightscrollbar)
@@ -368,8 +369,12 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
-        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
+        super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.uint16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
+
+    @property
+    def problem_definition(self):
+        return ProblemDefinition(domains=Domains(ranges=np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), names=("Coupe", )), fitness=OpenBoxFE(self.__widthscrollbar.value, self.__heightscrollbar.value))
 
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     

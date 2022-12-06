@@ -45,13 +45,13 @@ class OpenBoxFE(FE):
         self.__width = width
         self.__length = length
 
-    def __call__(self, cut_length):
-        return self.fitness_evaluation(cut_length)
+    def __call__(self, data):
+        return self.fitness_evaluation(data)
 
-    def fitness_evaluation(self, cut_length):
+    def fitness_evaluation(self, data):
         width = self.__width
         length = self.__length
-        cut_length = cut_length[0]
+        cut_length = data[0]
         width -= 2 * cut_length
         length -= 2 * cut_length
         height = cut_length

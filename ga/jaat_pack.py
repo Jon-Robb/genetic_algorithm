@@ -232,12 +232,15 @@ class ScrollValue(QWidget):
         self.__sb = val
         
 class ScrollValueButton(ScrollValue):
-    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = None, parent=None, step_value: int = 1):
+    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = 50, parent=None, step_value: int = 1):
         super().__init__(title, range, fixed_widget_length, init, parent, step_value)
+        self.__init = init
         self.__button = QPushButton("!");
         self.__button.set_fixed_width(fixed_widget_length/2)
         # self.__button.tool_tip = f'Reset to default value : {value_prefix}{init_val:{format_string}}{value_suffix}'
         self.__button.tool_tip = f'Reset to default value : {init}'
+        # self.__button.connect(self.set_value)
+        self.__button.clicked.connect(lambda : self.set_value(self.__init))
         self.layout().add_widget(self.__button)
 
 class QxVerticalControlPanel(QGroupBox):

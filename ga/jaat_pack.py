@@ -368,11 +368,14 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
 
     def _update_from_simulation(self, ga=None):
         if ga is None:
-            return 
-        pass
+            self.draw_on_canvas() 
+        else:
+            self.draw_on_canvas(ga)
+                
+
     
     @abstractmethod
-    def draw_on_canvas(self, data):
+    def draw_on_canvas(self, data=None):
         pass
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
@@ -399,7 +402,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
-        self.draw_on_canvas(50)
+        # self.draw_on_canvas(50)
         
         super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
@@ -408,26 +411,42 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), names=("Coupe", )), fitness=OpenBoxFE(self.__widthscrollbar.value, self.__heightscrollbar.value))
 
-    def draw_on_canvas(self, data):
+    def draw_on_canvas(self, ga=None):
        
-        canvas_width = 400
-        canvas_height = 400
+        # canvas_width = 400
+        # canvas_height = 400
+        canvas_width = self.__widthscrollbar.value
+        canvas_height = self.__heightscrollbar.value
+        
         box_offset_x = canvas_width * 0.05
         box_offset_y = canvas_height * 0.1
         box_width = canvas_width * 0.9
         box_height = canvas_height * 0.8
-        
         img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
         img.fill(QColor(0,0,0,0))
         painter = QPainter(img)
         painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
-        painter.fill_rect(box_offset_x, box_offset_y, data, data, "black")
-        painter.fill_rect(box_width-data+box_offset_x,box_offset_y,data,data,"black")
-        painter.fill_rect(box_offset_x,box_height + box_offset_y-data,data,data,"black")
-        painter.fill_rect(box_width-data+box_offset_x,box_height + box_offset_y- data, data,data,"black")
+
+        
+        if ga is not None:
+            for unit in ga.population:
+                cut_lenght = unit[0]
+                pen = QPen(QColor(68,72,242,255))
+                pen.set_width(0.5)
+                painter.set_pen(pen)
+                painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
+                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
+                painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
+                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
+                    
+            painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
+            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
+                    
         self.__qx_visualization_panel.image = img 
         painter.end()
-
+        
         
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     

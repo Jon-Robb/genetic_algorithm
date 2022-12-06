@@ -6,6 +6,7 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 import numpy as np
 from typing import Optional
+from uqtwidgets import QImageViewer
 
 
 #  .----------------. 
@@ -261,14 +262,24 @@ class QxVisualizationPanel(QGroupBox):
 
         self.__layout = QVBoxLayout(self)
         self.__layout.content_margins = (0, 0, 0, 0)
+        
+       
+        
+        self.__image_viewer = QImageViewer()
+        self.__layout.add_widget(self.__image_viewer)
+        
+   
+    @property
+    def image(self):
+        return self.__image_viewer.image
+    
+    
+    @image.setter
+    def image(self, img):
+        self.__image_viewer.image = img
+    
 
-        
-        self.__canvas = QPixmap(self.width * 0.5, self.height * 0.5)
-        
-        self.__canvas.fill(Qt.black)
-        self.__canvas_box = QLabel(pixmap=self.__canvas)
-        self.__canvas_box.alignment = Qt.AlignCenter
-        self.__layout.add_widget(self.__canvas_box)
+   
 
 class QxForm(QWidget):
     def __init__(self, title_widget:list[(str,QWidget)]=None, parent=None):
@@ -344,6 +355,10 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
         if ga is None:
             return 
         pass
+    
+    @abstractmethod
+    def draw_on_canvas(self, data):
+        pass
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     pass
@@ -369,13 +384,23 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
+        self.draw_on_canvas(100)
+        
         super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.uint16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
-    @property
-    def problem_definition(self):
-        return ProblemDefinition(domains=Domains(ranges=np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), names=("Coupe", )), fitness=OpenBoxFE(self.__widthscrollbar.value, self.__heightscrollbar.value))
+    def draw_on_canvas(self, data):
+        img = QImage(400, 400, QImage.Format_ARGB32)
+        img.fill(QColor(0,0,0))
+        painter = QPainter(img)
+        painter.fill_rect(0, 0, data, data, "red")
+        painter.fill_rect(400-data,0,data,data,"red")
+        painter.fill_rect(0,400-data,data,data,"red")
+        painter.fill_rect(400-data,400-data,data,data,"red")
+        self.__qx_visualization_panel.image = img 
+        painter.end()
 
+        
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
      def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxFE()), default_parameters: Parameters = Parameters(), parent: QWidget = None):

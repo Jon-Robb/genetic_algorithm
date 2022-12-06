@@ -7,8 +7,8 @@ from PySide6.QtWidgets import *
 import numpy as np
 from typing import Optional
 from uqtwidgets import QImageViewer
-import random
-
+from uqtgui import *
+from random import randint
 
 #  .----------------. 
 # | .--------------. |
@@ -76,17 +76,44 @@ class OpenBoxFE(FE):
         self.__length = length
 
 class ShapeTransformationFE(FE):
-    def __init__(self, obstacle_count:int):
-        self.__obstacle_count = obstacle_count
-        self.__canvas = QImage(100, 100, QImage.Format_RGB32);
-        self.__obstacles_list = []
+    def __init__(self, polygone:QPolygon=None, obstacles:list[QPoint]=None, container:QRect=None):
         
-        for _ in range(obstacle_count):
-            self.__obstacles_list.append(QPointF(random.randint(0,100), random.randint(0,100)))
-            
-        pass
+        self.__polygone = polygone
+        self.__obstacles = obstacles
+        self.__container = container
+        # self.__array = self.create_image()
+        # self.randomize(self.__array, 0.5)
         
-            
+    def __call__(self, data):
+        return self.fitness_evaluation(data)    
+    
+    def fitness_evaluation(self, data):
+        translation_x = data[0]
+        translation_y = data[1]
+        rotation = data[2]
+        scaling = data[3]
+        
+        polygone = self.__polygone
+        transformation = QTransform().translate(translation_x, translation_y).rotate(rotation).scale(scaling, scaling)
+        transformation.map(polygone)
+        for obstacle in self.__obstacles:
+            if polygone.contains_point(obstacle, Qt.OddEvenFill):
+                return 0
+        if not self.__container.contains(polygone.bounding_rect()):
+            return 0
+        
+        return area_from_QPolygonF(polygone)
+        
+    
+    
+    # def randomize(self, image, percent=0.5):
+    #     rng = np.random.default_rng()
+    #     image[:] = (rng.random((image.shape)) <= percent).astype(image.dtype)
+    
+    # def create_image(self):
+    #     return np.zeros((self.__width, self.__height), dtype=np.uint8)
+    
+    
 
 class ImageCloningFE(FE):
     def __init__(self):
@@ -449,7 +476,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
-     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=OpenBoxFE()), default_parameters: Parameters = Parameters(), parent: QWidget = None):
+    def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
         self.__width_label = QLabel("650")
@@ -466,14 +493,29 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__shape_combobox.set_fixed_width(250)
         self.__shape_form_layout = QxForm([("Shape : ", self.__shape_combobox)])
         
+        self.__temp_ranges = np.asarray([[0, 650], 
+                                  [0, 500],
+                                  [0, 360],
+                                  [0, 1]], np.float16)
+        
         
         self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
+        self.__list = []
+        for _ in range(100):
+            self.__list.append(QPoint(randint(0,100),randint(0,100)))
+            
+        self.__image = QRectF(0,0,650,500)
 
-        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
+        super().__init__(name, summary, description, default_parameters,self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
+        
+        
+    @property
+    def problem_definition(self):
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(), self.__list, self.__image))
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=FE()), default_parameters: Parameters = Parameters(), vertical_control_panel: QxVerticalControlPanel = None, visualisation_panel: QxVisualizationPanel = None, parent: QWidget = None):

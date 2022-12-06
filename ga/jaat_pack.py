@@ -75,11 +75,23 @@ class OpenBoxFE(FE):
         self.__length = length
 
 class ShapeTransformationFE(FE):
-    def __init__(self):
-        pass
+    def __init__(self, width=50, height=100):
+        self.__width = width
+        self.__height = height
+        self.__array = self.create_image()
+        self.randomize(self.__array, 0.5)
+        
+    def randomize(self, image, percent=0.5):
+        rng = np.random.default_rng()
+        image[:] = (rng.random((image.shape)) <= percent).astype(image.dtype)
+    
+    def create_image(self):
+        return np.zeros((self.__width, self.__height), dtype=np.uint8)
+    
 
 class ImageCloningFE(FE):
-    pass
+    def __init__(self):
+        pass
 # ------------------------------------------------------------------------------------------ 
 #   _____ _             _             _           
 #  / ____| |           | |           (_)          
@@ -485,6 +497,8 @@ if __name__ == "__main__":
     p = FE()
     print(p())
 
-    obp = OpenBoxFE(50, 100)
-    print(obp((14.25634434,0)))
+    # obp = OpenBoxFE(50, 100)
+    # print(obp((14.25634434,0)))
+    
+    shape_shift = ShapeTransformationFE(50, 100)
 # ------------------------------------------------------------------------------------------ 

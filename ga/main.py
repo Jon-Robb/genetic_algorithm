@@ -2,8 +2,6 @@ import sys
 from jaat_pack import *
 import gaapp
 
-
-
 from gaapp import QSolutionToSolvePanel
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *

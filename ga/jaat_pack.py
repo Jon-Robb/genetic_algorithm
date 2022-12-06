@@ -29,11 +29,11 @@ from typing import Optional
 # ------------------------------------------------------------------------------------------                                                                 
 class FE():
 
-    def fitness(self):
+    def fitness_evaluation(self):
         return "A fitness method"
 
-    def __call__(self):
-        return self.fitness()
+    def __call__(self, data: np.ndarray):
+        return self.fitness_evaluation(data)
 
 class OpenBoxFE(FE):
 
@@ -71,7 +71,8 @@ class OpenBoxFE(FE):
         self.__length = length
 
 class ShapeTransformationFE(FE):
-    pass
+    def __init__(self):
+        pass
 
 class ImageCloningFE(FE):
     pass

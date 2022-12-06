@@ -7,6 +7,7 @@ from PySide6.QtWidgets import *
 import numpy as np
 from typing import Optional
 from uqtwidgets import QImageViewer
+import random
 
 
 #  .----------------. 
@@ -75,19 +76,17 @@ class OpenBoxFE(FE):
         self.__length = length
 
 class ShapeTransformationFE(FE):
-    def __init__(self, width=50, height=100):
-        self.__width = width
-        self.__height = height
-        self.__array = self.create_image()
-        self.randomize(self.__array, 0.5)
+    def __init__(self, obstacle_count:int):
+        self.__obstacle_count = obstacle_count
+        self.__canvas = QImage(100, 100, QImage.Format_RGB32);
+        self.__obstacles_list = []
         
-    def randomize(self, image, percent=0.5):
-        rng = np.random.default_rng()
-        image[:] = (rng.random((image.shape)) <= percent).astype(image.dtype)
-    
-    def create_image(self):
-        return np.zeros((self.__width, self.__height), dtype=np.uint8)
-    
+        for _ in range(obstacle_count):
+            self.__obstacles_list.append(QPointF(random.randint(0,100), random.randint(0,100)))
+            
+        pass
+        
+            
 
 class ImageCloningFE(FE):
     def __init__(self):
@@ -519,5 +518,5 @@ if __name__ == "__main__":
     # obp = OpenBoxFE(50, 100)
     # print(obp((14.25634434,0)))
     
-    shape_shift = ShapeTransformationFE(50, 100)
+    shape_shift = ShapeTransformationFE(50)
 # ------------------------------------------------------------------------------------------ 

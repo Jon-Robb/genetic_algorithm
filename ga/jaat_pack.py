@@ -94,8 +94,13 @@ class ShapeTransformationFE(FE):
         scaling = data[3]
         
         polygone = self.__polygone
-        transformation = QTransform().translate(translation_x, translation_y).rotate(rotation).scale(scaling, scaling)
-        transformation.map(polygone)
+        transformation = QTransform()
+        transformation.translate(translation_x, translation_y)
+        transformation.rotate(rotation)
+        transformation.scale(scaling, scaling)
+        
+        polygone = transformation.map(polygone)
+                       
         for obstacle in self.__obstacles:
             if polygone.contains_point(obstacle, Qt.OddEvenFill):
                 return 0
@@ -496,7 +501,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__temp_ranges = np.asarray([[0, 650], 
                                   [0, 500],
                                   [0, 360],
-                                  [0, 1]], np.float16)
+                                  [0, 1]], np.float32)
         
         
         self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
@@ -505,17 +510,17 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__qx_visualization_panel  = QxVisualizationPanel()
         self.__list = []
         for _ in range(100):
-            self.__list.append(QPoint(randint(0,100),randint(0,100)))
+            self.__list.append(QPoint(randint(0,650),randint(0,500)))
             
-        self.__image = QRectF(0,0,650,500)
+        self.__conteneur = QRectF(0,0,650,500)
 
-        super().__init__(name, summary, description, default_parameters,self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
+        super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
         
         
     @property
     def problem_definition(self):
-        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(), self.__list, self.__image))
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__list, self.__conteneur))
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=FE()), default_parameters: Parameters = Parameters(), vertical_control_panel: QxVerticalControlPanel = None, visualisation_panel: QxVisualizationPanel = None, parent: QWidget = None):

@@ -17,7 +17,9 @@ def main():
     # --------------------------------------------------------
     # ajout de vos stratégies (exemple) :
     # ga_app.add_crossover_strategy(my_awesome_strategy)
-    ga_app.add_mutation_strategy(DoubleGeneMutationStrategy())
+    ga_app.add_mutation_strategy(DoubleGeneMutationStrategy)
+    ga_app.add_mutation_strategy(AllGenesMutationStrategy)
+
     # --------------------------------------------------------
     # <Votre code ici>
     

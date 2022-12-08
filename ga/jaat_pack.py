@@ -10,6 +10,7 @@ from uqtwidgets import QImageViewer
 from uqtgui import *
 from random import randint
 from PIL import Image
+from PIL.ImageQt import ImageQt
 
 #  .----------------. 
 # | .--------------. |
@@ -183,6 +184,26 @@ class DoubleGeneMutationStrategy(MutationStrategy):
                 offspring[index2] = domains.random_value(index2)
 
         
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
+class AllGenesMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, deux gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Mutate All Genes'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                for i in range(0, offsprings.shape[1]):
+                    offspring[i] = domains.random_value(i)
+
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 # ------------------------------------------------------------------------------------------ 
 #  .----------------.  .----------------. 
@@ -557,11 +578,11 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__generate_img_btn = QPushButton("Generate Image")
         
         # On va chercher notre image
-        self.__image = Image.open("ga/images/rick.png")
+        self.__image = Image.open("ga/images/yoda.jpg")
         
         # On transforme notre image en array numpy, puis on le flatten
-        arr = np.asarray(self.__image)
-        arr_flat = arr.flatten();
+        self.__img_arr = np.asarray(self.__image)
+        arr_flat = self.__img_arr.flatten();
         
         # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
         self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)
@@ -590,39 +611,58 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
 
     def draw_on_canvas(self, ga=None):
            
+           
+           
         # canvas_width = 400
         # canvas_height = 400
-        canvas_width = self.__widthscrollbar.value
-        canvas_height = self.__heightscrollbar.value
+        # canvas_width = self.__widthscrollbar.value
+        # canvas_height = self.__heightscrollbar.value
         
-        box_offset_x = canvas_width * 0.05
-        box_offset_y = canvas_height * 0.1
-        box_width = canvas_width * 0.9
-        box_height = canvas_height * 0.8
-        img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
-        img.fill(QColor(0,0,0,0))
-        painter = QPainter(img)
-        painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
+        # box_offset_x = canvas_width * 0.05
+        # box_offset_y = canvas_height * 0.1
+        # box_width = canvas_width * 0.9
+        # box_height = canvas_height * 0.8
+        # img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
+        # img.fill(QColor(0,0,0,0))
+        # painter = QPainter(img)
+        # painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
 
         
-        if ga is not None:
-            for unit in ga.population:
-                cut_lenght = unit[0]
-                pen = QPen(QColor(68,72,242,255))
-                pen.set_width(0.5)
-                painter.set_pen(pen)
-                painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
-                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
-                painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
-                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
+        # if ga is not None:
+        #     for unit in ga.population:
+        #         cut_lenght = unit[0]
+        #         pen = QPen(QColor(68,72,242,255))
+        #         pen.set_width(0.5)
+        #         painter.set_pen(pen)
+        #         painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
+        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
+        #         painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
+        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
                     
-            painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
-            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
-            painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
-            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
-                    
-        self.__qx_visualization_panel.image = img 
-        painter.end()
+            # painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
+            # painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            # painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            # painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
+             
+        
+        if ga:
+            img = ga.history.best_solution.reshape(self.__img_arr.shape)
+            # Array to Pillow Image
+            img = Image.fromarray(img.astype('uint8'), 'RGB') 
+            # Pillow Image to QImage
+            img = QImage(ImageQt(img))
+
+        else:
+           #img = QImage()
+            img = ImageQt(self.__image)   
+            
+        self.__qx_visualization_panel.image = img
+
+            
+            
+            
+            
+        # painter.end()
         
 
 # ------------------------------------------------------------------------------------------ 

@@ -9,6 +9,7 @@ from typing import Optional
 from uqtwidgets import QImageViewer
 from uqtgui import *
 from random import randint
+from PIL import Image
 
 #  .----------------. 
 # | .--------------. |
@@ -121,8 +122,25 @@ class ShapeTransformationFE(FE):
     
 
 class ImageCloningFE(FE):
-    def __init__(self):
-        pass
+    def __init__(self, image_array:np.ndarray=None):
+        
+        self.__image_array = image_array
+        
+        
+    def __call__(self, data):
+        return self.fitness_evaluation(data)
+    
+    def fitness_evaluation(self, data):
+        
+        max_distance = np.sum(abs(self.__image_array - 255))
+        distance = np.sum(abs(self.__image_array - data))
+        
+        return abs(distance - max_distance)
+        
+        
+        
+        
+        
 # ------------------------------------------------------------------------------------------ 
 #   _____ _             _             _           
 #  / ____| |           | |           (_)          
@@ -523,7 +541,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__list, self.__conteneur))
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
-    def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description", problem_definition: ProblemDefinition = ProblemDefinition(domains=Domains(ranges=np.zeros((3, 2)), names=("x", "y", "z")), fitness=FE()), default_parameters: Parameters = Parameters(), vertical_control_panel: QxVerticalControlPanel = None, visualisation_panel: QxVisualizationPanel = None, parent: QWidget = None):
+    def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         self.__width_label = QLabel("650")
         self.__height_label = QLabel("500")
@@ -537,15 +555,75 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
         
         self.__generate_img_btn = QPushButton("Generate Image")
-
+        
+        # On va chercher notre image
+        self.__image = Image.open("ga/images/rick.png")
+        
+        # On transforme notre image en array numpy, puis on le flatten
+        arr = np.asarray(self.__image)
+        arr_flat = arr.flatten();
+        
+        # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
+        self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)
+        
+        self.__domain_names = []
+        for i in range(1, int(arr_flat.shape[0] / 3) + 1):
+            for j in range(3):
+                if j % 3 == 0:
+                    self.__domain_names.append("R of pixel " + str(i))
+                elif j % 3 == 1:
+                    self.__domain_names.append("G of pixel " + str(i))
+                else:
+                    self.__domain_names.append("B of pixel " + str(i))
+        
         self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__generate_img_btn]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
-        super().__init__(name, summary, description, problem_definition, default_parameters, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
+        super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
     
+    @property
+    def problem_definition(self):
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
+
+    def draw_on_canvas(self, ga=None):
+           
+        # canvas_width = 400
+        # canvas_height = 400
+        canvas_width = self.__widthscrollbar.value
+        canvas_height = self.__heightscrollbar.value
+        
+        box_offset_x = canvas_width * 0.05
+        box_offset_y = canvas_height * 0.1
+        box_width = canvas_width * 0.9
+        box_height = canvas_height * 0.8
+        img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
+        img.fill(QColor(0,0,0,0))
+        painter = QPainter(img)
+        painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
+
+        
+        if ga is not None:
+            for unit in ga.population:
+                cut_lenght = unit[0]
+                pen = QPen(QColor(68,72,242,255))
+                pen.set_width(0.5)
+                painter.set_pen(pen)
+                painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
+                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
+                painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
+                painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
+                    
+            painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
+            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
+            painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
+                    
+        self.__qx_visualization_panel.image = img 
+        painter.end()
+        
 
 # ------------------------------------------------------------------------------------------ 
 #  _______        _   _             

@@ -8,7 +8,7 @@ import numpy as np
 from typing import Optional
 from uqtwidgets import QImageViewer
 from uqtgui import *
-from random import randint
+import random
 from PIL import Image
 from PIL.ImageQt import ImageQt
 from os import listdir, path
@@ -364,7 +364,9 @@ class QxVisualizationPanel(QGroupBox):
     def image(self, img):
         self.__image_viewer.image = img
     
-
+    @property
+    def image_viewer(self):
+        return self.__image_viewer
    
 
 class QxForm(QWidget):
@@ -521,6 +523,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
+    
     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
@@ -532,6 +535,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         
         self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50)
         self.__generate_obtacle_btn = QPushButton("Generate Obstacle")
+        
         
         self.__shape_combobox = QComboBox()
         self.__shape_combobox.add_items(["Circle","Rectangle","Triangle"])
@@ -548,20 +552,85 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
-        self.__list = []
-        for _ in range(100):
-            self.__list.append(QPoint(randint(0,650),randint(0,500)))
-            
-        self.__conteneur = QRectF(0,0,650,500)
+        self.__conteneur = QRectF(0,0,640,400)
+        
+        self.__img = QImage(int(self.__conteneur.width()), int(self.__conteneur.height()), QImage.Format_ARGB32)
+        self.__img.fill(QColor(0,0,0,255))
+        
+        self.__obstacles = []
+        self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
+        self.draw_obstacles()
+        
+        # connections
+        self.__obstacle_count_sb.valueChanged.connect(self.update_obstacles)
+        self.__generate_obtacle_btn.clicked.connect(self.generate_obstacles) 
+        
+        
 
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
-        
-        
+    
+    def generate_obstacles(self):
+        self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
+        self.draw_obstacles()
+    
+    def update_obstacles(self, value):
+        self.__obstacles.clear()
+        for _ in range(self.__obstacle_count_sb.step_value * value):
+            self.__obstacles.append(QPointF(random.randrange(0,self.__conteneur.width() + 1),random.randrange(0,self.__conteneur.height() + 1)))
+        pass
+    def draw_obstacles(self):
+        self.__img.fill(QColor(0,0,0,255))
+        painter = QPainter(self.__img)
+        # painter.fill_rect(0,0, self.__conteneur.width, self.__conteneur.height, "black")
+        pen = QPen(QColor(255,255,255,255))
+        painter.set_pen(pen)
+        for obstacle in self.__obstacles:
+            painter.draw_rect(obstacle.x() - 1,obstacle.y() - 1 ,2 ,2)
+        self.__qx_visualization_panel.image = self.__img
+        painter.end()
+      
     @property
     def problem_definition(self):
-        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__list, self.__conteneur))
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__obstacles, self.__conteneur))
 
+
+    
+    def draw_on_canvas(self, ga=None):
+           pass
+       
+        
+        
+        # box_offset_x = canvas_width * 0.05
+        # box_offset_y = canvas_height * 0.1
+        # box_width = canvas_width * 0.9
+        # box_height = canvas_height * 0.8
+        # img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
+        # img.fill(QColor(0,0,0,0))
+        # painter = QPainter(img)
+        # painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
+
+        
+        # if ga is not None:
+        #     for unit in ga.population:
+        #         cut_lenght = unit[0]
+        #         pen = QPen(QColor(68,72,242,255))
+        #         pen.set_width(0.5)
+        #         painter.set_pen(pen)
+        #         painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
+        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
+        #         painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
+        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
+                    
+        #     painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
+        #     painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
+        #     painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
+        #     painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
+                    
+        # self.__qx_visualization_panel.image = img 
+        # painter.end()
+        
+        
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
         self.__width_label = QLabel("-")
@@ -659,6 +728,25 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     def text_changed(self, text):
         self.__load_image(text)
         self.draw_on_canvas()
+    def draw_on_canvas(self, ga=None):
+        
+        if ga:
+            img = ga.history.best_solution.reshape(self.__img_arr.shape)
+            # Array to Pillow Image
+            img = Image.fromarray(img.astype('uint8'), 'RGB') 
+            # Pillow Image to QImage
+            img = QImage(ImageQt(img))
+
+        else:
+           #img = QImage()
+            img = ImageQt(self.__image)   
+            
+        self.__qx_visualization_panel.image = img
+
+            
+            
+            
+            
         
 
 # ------------------------------------------------------------------------------------------ 

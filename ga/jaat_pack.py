@@ -582,12 +582,18 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                 # i = i.split(".")[0]
                 self.__arr_of_image.append(i)
                 
-        self.__image = None
+        self.__image = self.__arr_of_image[0]
                 
         self.__image_combobox.add_items(self.__arr_of_image)
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
-        self.__image_label = QImageViewer()
-        self.__image_label.image = self.__image
+        self.__image_label = QLabel()
+        self.__image_label.set_fixed_width(100)
+        self.__image_label.set_fixed_height(100)
+        
+
+
+ 
+
         # add image to label
         
         
@@ -643,6 +649,11 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                 else:
                     self.__domain_names.append("B of pixel " + str(i))
     
+    
+    
+    def setting_image(self, text):
+        newPixmap = QPixmap(self.__image_directory + text)
+        self.__image_label.set_pixmap(newPixmap)
     @property
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
@@ -658,6 +669,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     @Slot()
     def text_changed(self, text):
         self.__load_image(text)
+        self.setting_image(text)
         self.draw_on_canvas()
         
 

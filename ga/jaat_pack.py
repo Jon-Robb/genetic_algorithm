@@ -334,7 +334,7 @@ class QxVerticalControlPanel(QGroupBox):
         self.__q_widgets = []
         self.__layout = layout if layout else QVBoxLayout()
         self.set_layout(self.__layout)
-       
+
         if menus is not None:
             for i, q_widget in enumerate(menus):
                 self.__q_widgets.append(q_widget)
@@ -544,8 +544,10 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__shape_combobox.set_fixed_width(250)
         self.__shape_form_layout = QxForm([("Shape : ", self.__shape_combobox)])
         self.__image_viewer = QImageViewer()
-        self.__image_viewer.image = self.__rectangle
-
+        self.__image_viewer.minimum_height = 200
+        # self.__image_viewer.image = QImage(int(self.__conteneur.width()), int(self.__conteneur.height()), QImage.Format_ARGB32)
+        # self.__img_label = QLabel()
+        
         self.__temp_ranges = np.asarray([[0, 650], 
                                   [0, 500],
                                   [0, 360],
@@ -563,6 +565,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacles = []
         self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
         self.draw_obstacles()
+        self.draw_shape(self.__image_viewer)
         # self.draw_shape(self.__current_shape, self.__image_viewer)
 
         # connections
@@ -574,15 +577,15 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         
     def update_shape(self, value):
         self.change_shape(value)
-        self.draw_shape(value, self.__image_viewer)
+        self.draw_shape(self.__image_viewer)
 
-    def change_shape(self, shape):
+    def change_shape(self, value):
 
-        if self.__shape_combobox.current_text == "Rectangle":
+        if value == "Rectangle":
             self.__current_shape = self.__rectangle
-        elif self.__shape_combobox.current_text == "Triangle":
+        elif value == "Triangle":
             self.__current_shape = self.__triangle
-        elif self.__shape_combobox.current_text == "Porygon":
+        elif value == "Porygon":
             self.__current_shape = self.__porygon
         else:
             raise ValueError("Unknown shape")
@@ -611,18 +614,28 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(self.__current_shape, self.__obstacles, self.__conteneur))
 
-    def draw_shape(self, polygon : QPolygonF, canevas:QImageViewer):
-        self.__img.fill(QColor(0,0,0,255))
+    def draw_shape(self, canevas:QImageViewer, img = None):
+        if img is None:
+            img = QImage(161, 100, QImage.Format_ARGB32)
+            temp_shape = self.__current_shape
+            transform = QTransform()
+            transform.scale(0.1,0.1)
+            temp_shape = transform.map(temp_shape)
+            
+
+        img.fill(QColor(0,0,0,255))
         painter = QPainter(self.__img)
         pen = QPen(QColor(128,0,128,255))
         painter.set_pen(pen)
-        painter.draw_polygon(polygon)
-        canevas.image = self.__img
+        painter.draw_polygon(self.__current_shape if not temp_shape else temp_shape)
+        canevas.image = img
         painter.end()
     
     def draw_on_canvas(self, ga=None):
-        self.draw_shape(self.__current_shape, self.__qx_visualization_panel.image_viewer)
+        if ga:
+            self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__img)
         self.draw_obstacles()
+
 
 
 

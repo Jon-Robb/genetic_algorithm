@@ -564,24 +564,25 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
+        self.__width_label = QLabel("-")
+        self.__height_label = QLabel("-")
         
-        self.__width_label = QLabel("650")
-        self.__height_label = QLabel("500")
         self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]
         self.__width_height_form_layout = QxForm(self.__form_list)        
         
-        self.__pixels_count_sb = ScrollValueButton("Pixels Count : ", (0, 1000),100, 500)
+        self.__pixels_count_sb = ScrollValueButton("Image ratio : ", (0, 200), 100, 100)
         
         self.__image_combobox = QComboBox() 
         self.__image_directory = "ga/images/"
         self.__arr_of_image_files = listdir(self.__image_directory)
-        self.__arr_of_image_files = [i for i in self.__arr_of_image_files if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg")]
         self.__arr_of_image = []
         for i in self.__arr_of_image_files:
             if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg"):
                 # On enlève l'extension
                 # i = i.split(".")[0]
                 self.__arr_of_image.append(i)
+                
+        self.__image = None
                 
         self.__image_combobox.add_items(self.__arr_of_image)
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
@@ -620,6 +621,10 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         # On transforme notre image en array numpy, puis on le flatten
         self.__img_arr = np.asarray(self.__image)
         arr_flat = self.__img_arr.flatten()
+        
+        # Set image with and height in the label
+        # self.__width_label.text = str()
+        # self.__height_label.text = str()
         
         # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
         self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)

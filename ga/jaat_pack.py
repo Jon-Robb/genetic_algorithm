@@ -599,19 +599,19 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
     
-    def draw_on_canvas(self, ga=None):       
+    def draw_on_canvas(self, ga=None):
         if ga:
             img = ga.history.best_solution.reshape(self.__img_arr.shape)
             # Array to Pillow Image
             img = Image.fromarray(img.astype('uint8'), 'RGB') 
             # Pillow Image to QImage
-            img = QImage(ImageQt(img))
+            self.__imgQt = QImage(ImageQt(img))
 
         else:
-        #img = QImage()
-            img = ImageQt(self.__image)   
+           #img = QImage()
+            self.__imgQt = ImageQt(self.__image)   
             
-        self.__qx_visualization_panel.image = img
+        self.__qx_visualization_panel.image = self.__imgQt
         
     def __load_image(self, image_name):
         # On va chercher notre image
@@ -646,35 +646,10 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     def image(self, image):
         self.__image = image
 
-
-    def draw_on_canvas(self, ga=None):       
-             
-        
-        if ga:
-            img = ga.history.best_solution.reshape(self.__img_arr.shape)
-            # Array to Pillow Image
-            img = Image.fromarray(img.astype('uint8'), 'RGB') 
-            # Pillow Image to QImage
-            self.__imgQt = QImage(ImageQt(img))
-
-        else:
-           #img = QImage()
-            self.__imgQt = ImageQt(self.__image)   
-            
-        self.__qx_visualization_panel.image = self.__imgQt
-
     @Slot()
     def text_changed(self, text):
-        self.image = Image.open(self.__image_directory + text)
+        self.__load_image(text)
         self.draw_on_canvas()
-
-
-
-
-            
-            
-            
-        # painter.end()
         
 
 # ------------------------------------------------------------------------------------------ 

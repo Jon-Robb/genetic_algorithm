@@ -572,27 +572,29 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         
         self.__pixels_count_sb = ScrollValueButton("Pixels Count : ", (0, 1000),100, 500)
         
-        self.__image_combobox = QComboBox()
-        arr_of_image_files = listdir("ga/images")
-        arr_of_image_files = [i for i in arr_of_image_files if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg")]
-        arr_of_image = []
-        for i in arr_of_image_files:
+        self.__image_combobox = QComboBox() 
+        self.__image_directory = "ga/images/"
+        self.__arr_of_image_files = listdir(self.__image_directory)
+        self.__arr_of_image_files = [i for i in self.__arr_of_image_files if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg")]
+        self.__arr_of_image = []
+        for i in self.__arr_of_image_files:
             if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg"):
                 # On enlève l'extension
-                i = i.split(".")[0]
-                arr_of_image.append(i)
+                # i = i.split(".")[0]
+                self.__arr_of_image.append(i)
                 
-        self.__image_combobox.add_items(arr_of_image)
+        self.__image_combobox.add_items(self.__arr_of_image)
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
         
         self.__generate_img_btn = QPushButton("Generate Image")
+        self.__image_combobox.currentTextChanged.connect(self.text_changed)
         
         # On va chercher notre image
-        self.__image = Image.open("ga/images/optimus-prime.webp")
+        self.__image = Image.open(self.__image_directory + self.__arr_of_image_files[0])
         
         # On transforme notre image en array numpy, puis on le flatten
         self.__img_arr = np.asarray(self.__image)
-        arr_flat = self.__img_arr.flatten();
+        arr_flat = self.__img_arr.flatten()
         
         # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
         self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)
@@ -619,40 +621,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
 
-    def draw_on_canvas(self, ga=None):
-           
-           
-           
-        # canvas_width = 400
-        # canvas_height = 400
-        # canvas_width = self.__widthscrollbar.value
-        # canvas_height = self.__heightscrollbar.value
-        
-        # box_offset_x = canvas_width * 0.05
-        # box_offset_y = canvas_height * 0.1
-        # box_width = canvas_width * 0.9
-        # box_height = canvas_height * 0.8
-        # img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
-        # img.fill(QColor(0,0,0,0))
-        # painter = QPainter(img)
-        # painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
-
-        
-        # if ga is not None:
-        #     for unit in ga.population:
-        #         cut_lenght = unit[0]
-        #         pen = QPen(QColor(68,72,242,255))
-        #         pen.set_width(0.5)
-        #         painter.set_pen(pen)
-        #         painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
-        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
-        #         painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
-        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
-                    
-            # painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
-            # painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
-            # painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
-            # painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
+    def draw_on_canvas(self, ga=None):       
              
         
         if ga:
@@ -668,7 +637,12 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
             
         self.__qx_visualization_panel.image = img
 
-            
+    @Slot()
+    def text_changed(self, text):
+        self.__image = Image.open(self.__image_directory + text)
+
+
+
             
             
             

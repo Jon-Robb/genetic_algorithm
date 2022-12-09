@@ -578,7 +578,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__generate_img_btn = QPushButton("Generate Image")
         
         # On va chercher notre image
-        self.__image = Image.open("ga/images/yoda.jpg")
+        self.__image = Image.open("ga/images/optimus-prime.webp")
         
         # On transforme notre image en array numpy, puis on le flatten
         self.__img_arr = np.asarray(self.__image)

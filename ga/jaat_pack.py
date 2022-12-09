@@ -547,7 +547,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
                                   [0, 360],
                                   [0, 1]], np.float32)
         
-        
+
         self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
@@ -565,8 +565,6 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacle_count_sb.valueChanged.connect(self.update_obstacles)
         self.__generate_obtacle_btn.clicked.connect(self.generate_obstacles) 
         
-        
-
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
     
@@ -593,44 +591,11 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     @property
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__obstacles, self.__conteneur))
-
-
     
     def draw_on_canvas(self, ga=None):
            pass
-       
-        
-        
-        # box_offset_x = canvas_width * 0.05
-        # box_offset_y = canvas_height * 0.1
-        # box_width = canvas_width * 0.9
-        # box_height = canvas_height * 0.8
-        # img = QImage(canvas_width, canvas_height, QImage.Format_ARGB32)
-        # img.fill(QColor(0,0,0,0))
-        # painter = QPainter(img)
-        # painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
 
-        
-        # if ga is not None:
-        #     for unit in ga.population:
-        #         cut_lenght = unit[0]
-        #         pen = QPen(QColor(68,72,242,255))
-        #         pen.set_width(0.5)
-        #         painter.set_pen(pen)
-        #         painter.draw_rect(box_offset_x, box_offset_y, cut_lenght, cut_lenght)
-        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_offset_y,cut_lenght,cut_lenght)
-        #         painter.draw_rect(box_offset_x,box_height + box_offset_y-cut_lenght,cut_lenght,cut_lenght)
-        #         painter.draw_rect(box_width-cut_lenght+box_offset_x,box_height + box_offset_y- cut_lenght, cut_lenght,cut_lenght)
-                    
-        #     painter.fill_rect(box_offset_x, box_offset_y, ga.history.best_solution[0], ga.history.best_solution[0], "black")
-        #     painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_offset_y,ga.history.best_solution[0],ga.history.best_solution[0],"black")
-        #     painter.fill_rect(box_offset_x,box_height + box_offset_y-ga.history.best_solution[0],ga.history.best_solution[0],ga.history.best_solution[0],"black")
-        #     painter.fill_rect(box_width-ga.history.best_solution[0]+box_offset_x,box_height + box_offset_y- ga.history.best_solution[0], ga.history.best_solution[0],ga.history.best_solution[0],"black")          
-                    
-        # self.__qx_visualization_panel.image = img 
-        # painter.end()
-        
-        
+
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
         self.__width_label = QLabel("-")
@@ -658,9 +623,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__image_label = QImageViewer()
         self.__image_label.image = self.__image
         # add image to label
-        
-        
-       
+
         self.__image_combobox.currentTextChanged.connect(self.text_changed)
         
         self.__load_image(self.__arr_of_image_files[0])
@@ -672,7 +635,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
-    
+
     def draw_on_canvas(self, ga=None):
         if ga:
             img = ga.history.best_solution.reshape(self.__img_arr.shape)
@@ -686,7 +649,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
             self.__imgQt = ImageQt(self.__image)   
             
         self.__qx_visualization_panel.image = self.__imgQt
-        
+
     def __load_image(self, image_name):
         # On va chercher notre image
         self.__image = Image.open(self.__image_directory + image_name)
@@ -711,7 +674,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                     self.__domain_names.append("G of pixel " + str(i))
                 else:
                     self.__domain_names.append("B of pixel " + str(i))
-    
+
     @property
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
@@ -719,7 +682,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     @property
     def image(self):
         return self.__image
-    
+
     @image.setter
     def image(self, image):
         self.__image = image
@@ -728,26 +691,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     def text_changed(self, text):
         self.__load_image(text)
         self.draw_on_canvas()
-    def draw_on_canvas(self, ga=None):
-        
-        if ga:
-            img = ga.history.best_solution.reshape(self.__img_arr.shape)
-            # Array to Pillow Image
-            img = Image.fromarray(img.astype('uint8'), 'RGB') 
-            # Pillow Image to QImage
-            img = QImage(ImageQt(img))
 
-        else:
-           #img = QImage()
-            img = ImageQt(self.__image)   
-            
-        self.__qx_visualization_panel.image = img
-
-            
-            
-            
-            
-        
 
 # ------------------------------------------------------------------------------------------ 
 #  _______        _   _             

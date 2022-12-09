@@ -589,8 +589,33 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__generate_img_btn = QPushButton("Generate Image")
         self.__image_combobox.currentTextChanged.connect(self.text_changed)
         
+        self.__load_image(self.__arr_of_image_files[0])
+        
+        self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__generate_img_btn]
+        
+        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
+        
+        self.__qx_visualization_panel  = QxVisualizationPanel()
+        
+        super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
+    
+    def draw_on_canvas(self, ga=None):       
+        if ga:
+            img = ga.history.best_solution.reshape(self.__img_arr.shape)
+            # Array to Pillow Image
+            img = Image.fromarray(img.astype('uint8'), 'RGB') 
+            # Pillow Image to QImage
+            img = QImage(ImageQt(img))
+
+        else:
+        #img = QImage()
+            img = ImageQt(self.__image)   
+            
+        self.__qx_visualization_panel.image = img
+        
+    def __load_image(self, image_name):
         # On va chercher notre image
-        self.__image = Image.open(self.__image_directory + self.__arr_of_image_files[0])
+        self.__image = Image.open(self.__image_directory + image_name)
         
         # On transforme notre image en array numpy, puis on le flatten
         self.__img_arr = np.asarray(self.__image)
@@ -608,44 +633,15 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                     self.__domain_names.append("G of pixel " + str(i))
                 else:
                     self.__domain_names.append("B of pixel " + str(i))
-        
-        self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__generate_img_btn]
-        
-        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
-        
-        self.__qx_visualization_panel  = QxVisualizationPanel()
-        
-        super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
     
     @property
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
 
-    def draw_on_canvas(self, ga=None):       
-             
-        
-        if ga:
-            img = ga.history.best_solution.reshape(self.__img_arr.shape)
-            # Array to Pillow Image
-            img = Image.fromarray(img.astype('uint8'), 'RGB') 
-            # Pillow Image to QImage
-            img = QImage(ImageQt(img))
-
-        else:
-           #img = QImage()
-            img = ImageQt(self.__image)   
-            
-        self.__qx_visualization_panel.image = img
-
     @Slot()
     def text_changed(self, text):
-        self.__image = Image.open(self.__image_directory + text)
-
-
-
-            
-            
-            
+        # self.__image = Image.open(self.__image_directory + text)
+        self.__load_image(text)
         # painter.end()
         
 

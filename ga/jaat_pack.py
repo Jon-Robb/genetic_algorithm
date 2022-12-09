@@ -627,8 +627,8 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         arr_flat = self.__img_arr.flatten()
         
         # Set image with and height in the label
-        # self.__width_label.text = str()
-        # self.__height_label.text = str()
+        self.__width_label.text = str(self.__img_arr.shape[1]) + " pixels"
+        self.__height_label.text = str(self.__img_arr.shape[0]) + " pixels"
         
         # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
         self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)

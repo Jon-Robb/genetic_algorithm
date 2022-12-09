@@ -8,7 +8,7 @@ import numpy as np
 from typing import Optional
 from uqtwidgets import QImageViewer
 from uqtgui import *
-from random import randint
+import random
 from PIL import Image
 from PIL.ImageQt import ImageQt
 from os import listdir, path
@@ -364,7 +364,9 @@ class QxVisualizationPanel(QGroupBox):
     def image(self, img):
         self.__image_viewer.image = img
     
-
+    @property
+    def image_viewer(self):
+        return self.__image_viewer
    
 
 class QxForm(QWidget):
@@ -521,6 +523,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         
 class QxShapeTransformationPanel(QxSolutionPanelFrame):
     
+    
     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
@@ -533,6 +536,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50)
         self.__generate_obtacle_btn = QPushButton("Generate Obstacle")
         
+        
         self.__shape_combobox = QComboBox()
         self.__shape_combobox.add_items(["Circle","Rectangle","Triangle"])
         self.__shape_combobox.set_fixed_width(250)
@@ -543,24 +547,54 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
                                   [0, 360],
                                   [0, 1]], np.float32)
         
-        
+
         self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
-        self.__list = []
-        for _ in range(100):
-            self.__list.append(QPoint(randint(0,650),randint(0,500)))
-            
-        self.__conteneur = QRectF(0,0,650,500)
-
+        self.__conteneur = QRectF(0,0,640,400)
+        
+        self.__img = QImage(int(self.__conteneur.width()), int(self.__conteneur.height()), QImage.Format_ARGB32)
+        self.__img.fill(QColor(0,0,0,255))
+        
+        self.__obstacles = []
+        self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
+        self.draw_obstacles()
+        
+        # connections
+        self.__obstacle_count_sb.valueChanged.connect(self.update_obstacles)
+        self.__generate_obtacle_btn.clicked.connect(self.generate_obstacles) 
+        
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
-        
-        
+    
+    def generate_obstacles(self):
+        self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
+        self.draw_obstacles()
+    
+    def update_obstacles(self, value):
+        self.__obstacles.clear()
+        for _ in range(self.__obstacle_count_sb.step_value * value):
+            self.__obstacles.append(QPointF(random.randrange(0,self.__conteneur.width() + 1),random.randrange(0,self.__conteneur.height() + 1)))
+        pass
+    def draw_obstacles(self):
+        self.__img.fill(QColor(0,0,0,255))
+        painter = QPainter(self.__img)
+        # painter.fill_rect(0,0, self.__conteneur.width, self.__conteneur.height, "black")
+        pen = QPen(QColor(255,255,255,255))
+        painter.set_pen(pen)
+        for obstacle in self.__obstacles:
+            painter.draw_rect(obstacle.x() - 1,obstacle.y() - 1 ,2 ,2)
+        self.__qx_visualization_panel.image = self.__img
+        painter.end()
+      
     @property
     def problem_definition(self):
-        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__list, self.__conteneur))
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__obstacles, self.__conteneur))
+    
+    def draw_on_canvas(self, ga=None):
+           pass
+
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
@@ -595,9 +629,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
  
 
         # add image to label
-        
-        
-       
+
         self.__image_combobox.currentTextChanged.connect(self.text_changed)
         
         self.__load_image(self.__arr_of_image_files[0])
@@ -609,7 +641,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
-    
+
     def draw_on_canvas(self, ga=None):
         if ga:
             img = ga.history.best_solution.reshape(self.__img_arr.shape)
@@ -623,7 +655,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
             self.__imgQt = ImageQt(self.__image)   
             
         self.__qx_visualization_panel.image = self.__imgQt
-        
+
     def __load_image(self, image_name):
         # On va chercher notre image
         self.__image = Image.open(self.__image_directory + image_name)
@@ -633,8 +665,8 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         arr_flat = self.__img_arr.flatten()
         
         # Set image with and height in the label
-        # self.__width_label.text = str()
-        # self.__height_label.text = str()
+        self.__width_label.text = str(self.__img_arr.shape[1]) + " pixels"
+        self.__height_label.text = str(self.__img_arr.shape[0]) + " pixels"
         
         # On crée un tableau de 2 colonnes range [0,255] et autant de lignes que de pixels
         self.__temp_ranges = np.full((arr_flat.shape[0], 2), [0, 255], np.float16)
@@ -661,7 +693,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     @property
     def image(self):
         return self.__image
-    
+
     @image.setter
     def image(self, image):
         self.__image = image
@@ -671,7 +703,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__load_image(text)
         self.setting_image(text)
         self.draw_on_canvas()
-        
+
 
 # ------------------------------------------------------------------------------------------ 
 #  _______        _   _             

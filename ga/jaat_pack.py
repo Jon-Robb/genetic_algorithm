@@ -236,7 +236,7 @@ class ScrollValue(QWidget):
         super().__init__(parent)
 
         
-        self.tool_tip = 'Valeur KNN'
+        self.tool_tip = 'Valeur de ' + title
         
         if init is None:
             init = round(sum(range) / 2)

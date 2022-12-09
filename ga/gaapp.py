@@ -315,7 +315,7 @@ class QGAParametersWidget(QGroupBox):
         self.title = 'Parameters'
         layout = QFormLayout(self)
 
-        self._maximum_epoch_widget, maximum_epoch_layout = uqtwidgets.create_scroll_int_value(10, 250, 10000)
+        self._maximum_epoch_widget, maximum_epoch_layout = uqtwidgets.create_scroll_int_value(10, 250, 50000)
         self._population_size_widget, population_size_layout = uqtwidgets.create_scroll_int_value(5, 25, 250)
         self._elitism_rate_widget, elitism_rate_layout = uqtwidgets.create_scroll_real_value(0., 0.05, 1., 2, 100., value_suffix = " %")
         self._selection_rate_widget, selection_rate_layout = uqtwidgets.create_scroll_real_value(0.01, 0.75, 1., 2, 100., value_suffix = " %")

@@ -634,7 +634,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]
         self.__width_height_form_layout = QxForm(self.__form_list)        
         
-        self.__pixels_count_sb = ScrollValueButton("Image ratio : ", (0, 200), 100, 100)
+        self.__pixels_count_sb = ScrollValueButton("Image scale : ", (0, 200), 100, 100)
         
         self.__image_combobox = QComboBox() 
         self.__image_directory = "ga/images/"

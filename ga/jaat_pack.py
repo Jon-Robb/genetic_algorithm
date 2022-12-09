@@ -11,7 +11,8 @@ from uqtgui import *
 from random import randint
 from PIL import Image
 from PIL.ImageQt import ImageQt
-
+from os import listdir, path
+from pathlib import Path
 #  .----------------. 
 # | .--------------. |
 # | | ____    ____ | |
@@ -572,7 +573,16 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__pixels_count_sb = ScrollValueButton("Pixels Count : ", (0, 1000),100, 500)
         
         self.__image_combobox = QComboBox()
-        self.__image_combobox.add_items(["Dali", "Picasso", "Van Gogh"])
+        arr_of_image_files = listdir("ga/images")
+        arr_of_image_files = [i for i in arr_of_image_files if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg")]
+        arr_of_image = []
+        for i in arr_of_image_files:
+            if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg"):
+                # On enlève l'extension
+                i = i.split(".")[0]
+                arr_of_image.append(i)
+                
+        self.__image_combobox.add_items(arr_of_image)
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
         
         self.__generate_img_btn = QPushButton("Generate Image")

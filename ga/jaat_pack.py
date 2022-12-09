@@ -621,6 +621,15 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
 
+    @property
+    def image(self):
+        return self.__image
+    
+    @image.setter
+    def image(self, image):
+        self.__image = image
+
+
     def draw_on_canvas(self, ga=None):       
              
         
@@ -629,17 +638,19 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
             # Array to Pillow Image
             img = Image.fromarray(img.astype('uint8'), 'RGB') 
             # Pillow Image to QImage
-            img = QImage(ImageQt(img))
+            self.__imgQt = QImage(ImageQt(img))
 
         else:
            #img = QImage()
-            img = ImageQt(self.__image)   
+            self.__imgQt = ImageQt(self.__image)   
             
-        self.__qx_visualization_panel.image = img
+        self.__qx_visualization_panel.image = self.__imgQt
 
     @Slot()
     def text_changed(self, text):
-        self.__image = Image.open(self.__image_directory + text)
+        self.image = Image.open(self.__image_directory + text)
+        self.draw_on_canvas()
+
 
 
 

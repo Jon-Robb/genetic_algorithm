@@ -134,7 +134,7 @@ class ImageCloningFE(FE):
     
     def fitness_evaluation(self, data):
         
-        max_distance = np.sum(max(abs(self.__image_array - 255)), 255 - self.__image_array)
+        max_distance = np.sum(np.maximum(abs(self.__image_array - 255), 255 - self.__image_array))
         distance = np.sum(abs(self.__image_array - data))
         
         return abs(distance - max_distance)
@@ -568,7 +568,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         # connections
         self.__obstacle_count_sb.valueChanged.connect(self.update_obstacles)
         self.__generate_obtacle_btn.clicked.connect(self.generate_obstacles) 
-        self.__shape_combobox.currentText.connect(self.update_shape)
+        self.__shape_combobox.currentTextChanged.connect(self.update_shape)
 
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         

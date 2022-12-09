@@ -585,13 +585,17 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                 
         self.__image_combobox.add_items(self.__arr_of_image)
         self.__image_form_layout = QxForm([("Image : ", self.__image_combobox)])
+        self.__image_label = QImageViewer()
+        self.__image_label.image = self.__image
+        # add image to label
         
-        self.__generate_img_btn = QPushButton("Generate Image")
+        
+       
         self.__image_combobox.currentTextChanged.connect(self.text_changed)
         
         self.__load_image(self.__arr_of_image_files[0])
         
-        self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__generate_img_btn]
+        self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__image_label]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         

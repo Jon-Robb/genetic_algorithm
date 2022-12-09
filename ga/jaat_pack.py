@@ -134,7 +134,7 @@ class ImageCloningFE(FE):
     
     def fitness_evaluation(self, data):
         
-        max_distance = np.sum(abs(self.__image_array - 255))
+        max_distance = np.sum(max(abs(self.__image_array - 255)), 255 - self.__image_array)
         distance = np.sum(abs(self.__image_array - data))
         
         return abs(distance - max_distance)
@@ -451,9 +451,6 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
     def draw_on_canvas(self, data=None):
         pass
 
-class QxImageCloningPanel(QxSolutionPanelFrame):
-    pass
-
 class QxOpenBoxPanel(QxSolutionPanelFrame):
     
     def __init__(   self,
@@ -475,7 +472,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
-        # self.draw_on_canvas(50)
+        self.draw_on_canvas()
         
         super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
         # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
@@ -527,32 +524,38 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", default_parameters: Parameters = Parameters(), parent: QWidget = None):
         
         
-        self.__width_label = QLabel("650")
-        self.__height_label = QLabel("500")
+        self.__width_label = QLabel("640")
+        self.__height_label = QLabel("400")
         
         self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]     
         self.__width_height_form_layout = QxForm(self.__form_list)
         
         self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50)
         self.__generate_obtacle_btn = QPushButton("Generate Obstacle")
-        
+
+        self.__conteneur = QRectF(0,0,640,400)
+        self.__rectangle = QPolygonF(QRectF(0,0, self.__conteneur.width(), self.__conteneur.height()))
+        self.__triangle = QPolygonF([QPointF(0,0), QPointF(self.__conteneur.width(), 0), QPointF(self.__conteneur.width() / 2, self.__conteneur.height())])
+        self.__porygon = QPolygonF([QPointF(0,85), QPointF(15,80), QPointF(190,215), QPointF(310,140), QPointF(230,125), QPointF(200,60), QPointF(245,10), QPointF(370,5), QPointF(480,35), QPointF(640,125), QPointF(640,140), QPointF(580,145), QPointF(425,150), QPointF(530, 235), QPointF(495,280), QPointF(570, 325), QPointF(600, 385), QPointF(580, 395), QPointF(380,365), QPointF(370, 345), QPointF(275, 360), QPointF(260,345), QPointF(185,365), QPointF(55,375), QPointF(25, 365), QPointF(70,300), QPointF(115,260), QPointF(0,95)])
+        self.__current_shape = self.__rectangle
         
         self.__shape_combobox = QComboBox()
-        self.__shape_combobox.add_items(["Circle","Rectangle","Triangle"])
+        self.__shape_combobox.add_items(["Rectangle","Triangle","Porygon"])
         self.__shape_combobox.set_fixed_width(250)
         self.__shape_form_layout = QxForm([("Shape : ", self.__shape_combobox)])
-        
+        self.__image_viewer = QImageViewer()
+        self.__image_viewer.image = self.__rectangle
+
         self.__temp_ranges = np.asarray([[0, 650], 
                                   [0, 500],
                                   [0, 360],
                                   [0, 1]], np.float32)
         
         
-        self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout]
+        self.__menu = [self.__width_height_form_layout,self.__obstacle_count_sb,self.__generate_obtacle_btn,self.__shape_form_layout, self.__image_viewer]
         
         self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
         self.__qx_visualization_panel  = QxVisualizationPanel()
-        self.__conteneur = QRectF(0,0,640,400)
         
         self.__img = QImage(int(self.__conteneur.width()), int(self.__conteneur.height()), QImage.Format_ARGB32)
         self.__img.fill(QColor(0,0,0,255))
@@ -560,16 +563,30 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacles = []
         self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
         self.draw_obstacles()
-        
+        # self.draw_shape(self.__current_shape, self.__image_viewer)
+
         # connections
         self.__obstacle_count_sb.valueChanged.connect(self.update_obstacles)
         self.__generate_obtacle_btn.clicked.connect(self.generate_obstacles) 
-        
-        
+        self.__shape_combobox.currentText.connect(self.update_shape)
 
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges,  self.__qx_vertical_control_panel ,self.__qx_visualization_panel, parent)
         
-    
+    def update_shape(self, value):
+        self.change_shape(value)
+        self.draw_shape(value, self.__image_viewer)
+
+    def change_shape(self, shape):
+
+        if self.__shape_combobox.current_text == "Rectangle":
+            self.__current_shape = self.__rectangle
+        elif self.__shape_combobox.current_text == "Triangle":
+            self.__current_shape = self.__triangle
+        elif self.__shape_combobox.current_text == "Porygon":
+            self.__current_shape = self.__porygon
+        else:
+            raise ValueError("Unknown shape")
+
     def generate_obstacles(self):
         self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
         self.draw_obstacles()
@@ -578,7 +595,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacles.clear()
         for _ in range(self.__obstacle_count_sb.step_value * value):
             self.__obstacles.append(QPointF(random.randrange(0,self.__conteneur.width() + 1),random.randrange(0,self.__conteneur.height() + 1)))
-        pass
+
     def draw_obstacles(self):
         self.__img.fill(QColor(0,0,0,255))
         painter = QPainter(self.__img)
@@ -592,12 +609,21 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
       
     @property
     def problem_definition(self):
-        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(QPolygonF(QRectF(0,0,650,500)), self.__obstacles, self.__conteneur))
+        return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(self.__current_shape, self.__obstacles, self.__conteneur))
 
-
+    def draw_shape(self, polygon : QPolygonF, canevas:QImageViewer):
+        self.__img.fill(QColor(0,0,0,255))
+        painter = QPainter(self.__img)
+        pen = QPen(QColor(128,0,128,255))
+        painter.set_pen(pen)
+        painter.draw_polygon(polygon)
+        canevas.image = self.__img
+        painter.end()
     
     def draw_on_canvas(self, ga=None):
-           pass
+        self.draw_shape(self.__current_shape, self.__qx_visualization_panel.image_viewer)
+        self.draw_obstacles()
+
        
         
         

@@ -667,6 +667,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.draw_obstacles(fill=False)
         painter = QPainter(self.__visualization_img)
         pen = QPen(QColor(128,0,128,255))
+        pen.set_width(2)
         painter.set_pen(pen)
 
         if ga:
@@ -695,7 +696,9 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
             transformation.scale(scaling, scaling)
             shape = transformation.map(self.__current_shape)
             shape = shape.to_polygon()
-            shape.fill = QColor(0,255,0,255)
+            pen = QPen(QColor(0,255,0,255))
+            pen.set_width(2)
+            painter.set_pen(pen)
             painter.draw_polygon(shape)
             self.__qx_visualization_panel.image_viewer.image = self.__visualization_img
 

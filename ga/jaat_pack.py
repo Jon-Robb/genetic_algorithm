@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from gacvm import Domains, Parameters, ProblemDefinition, MutationStrategy
+from gacvm import Domains, Parameters, ProblemDefinition, MutationStrategy, GeneMutationStrategy
 from gaapp import QSolutionToSolvePanel
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -188,7 +188,7 @@ class DoubleGeneMutationStrategy(MutationStrategy):
         
 class AllGenesMutationStrategy(MutationStrategy):
     '''
-    Lorsqu'une mutation a lieu, deux gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
+    Lorsqu'une mutation a lieu,  tous les gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
     '''
 
     def __init__(self):
@@ -204,6 +204,28 @@ class AllGenesMutationStrategy(MutationStrategy):
                 for i in range(0, offsprings.shape[1]):
                     offspring[i] = domains.random_value(i)
 
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
+        
+class TwoAxisSingleGeneMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, un seul gène est généré aléatoirement selon le domaine. Le gène modifié est déterminé aléatoirement parmi tous les gènes.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Two Axis Single Mutation'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                index = self._rng.integers(0, offsprings.shape[1])
+                offspring[index] = domains.random_value(index)
+        
+        np.apply_along_axis(do_mutation, 0, offsprings, mutation_rate, domains)
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 # ------------------------------------------------------------------------------------------ 
 #  .----------------.  .----------------. 

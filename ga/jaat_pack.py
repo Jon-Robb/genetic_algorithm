@@ -299,24 +299,7 @@ class AllGenesRandomMutationStrategy(MutationStrategy):
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
         
         
-class AlwaysMutateScale(MutationStrategy):
-    
-    def __init__(self):
-        super().__init__()
-        
-    @staticmethod
-    def name():
-        return 'Always mutate scale'
-    
-    def mutate(self, offsprings, mutation_rate, domains):
-        def do_mutation(offspring, mutation_rate, domains):
-            if self._rng.random() <= mutation_rate:
-                if offsprings.shape[1] > 3:
-                    index = self._rng.integers(0, offsprings.shape[1] - 1)
-                    offspring[index] = domains.random_value(index)
-                    offspring[3] = domains.random_value(3)
-            
-        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+
 # ------------------------------------------------------------------------------------------ 
 #  .----------------.  .----------------. 
 # | .--------------. || .--------------. |

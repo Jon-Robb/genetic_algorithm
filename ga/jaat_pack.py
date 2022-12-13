@@ -13,6 +13,31 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 from os import listdir, path
 from pathlib import Path
+
+#  __    __  .___________. __   __       __  .___________. __   _______     _______.
+# |  |  |  | |           ||  | |  |     |  | |           ||  | |   ____|   /       |
+# |  |  |  | `---|  |----`|  | |  |     |  | `---|  |----`|  | |  |__     |   (----`
+# |  |  |  |     |  |     |  | |  |     |  |     |  |     |  | |   __|     \   \    
+# |  `--'  |     |  |     |  | |  `----.|  |     |  |     |  | |  |____.----)   |   
+#  \______/      |__|     |__| |_______||__|     |__|     |__| |_______|_______/    
+                                                                                                                                          
+class Utils():
+    """
+    This class contains a method used to clamp a value between a min and max value.
+    """          
+    def clamp(value, min, max):
+        return max(min(value, max), min)
+
+    def clamp_max(value, max):
+        return min(value, max)
+    
+    def readfile(filename:str)->list:
+        data = []
+        with open(filename, 'r') as file:
+            for line in file:
+                data.append(line)
+        return data
+
 #  .----------------. 
 # | .--------------. |
 # | | ____    ____ | |
@@ -161,6 +186,76 @@ class ImageCloningFE(FE):
 # |  |   |  | |_| | || (_| | |_| | (_) | | | |
 # `--'   `--'\__,_|\__\__,_|\__|_|\___/|_| |_|
 # ------------------------------------------------------------------------------------------
+
+class ExploreAndFocusMutationStrategy(MutationStrategy):
+    '''
+    Combine la mutation de l'exploration et de la concentration.
+
+    '''
+
+class AllGenesCloseMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, tous les gènes sont modifiés près de leur valeur actuelle selon le domaine.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Mutate All Genes (Close)'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                for i in range(0, offsprings.shape[1]):
+                    offspring[i] += self._rng.choice([domains.random_value(i) * 0.1, domains.random_value(i) * -0.1])
+        
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+
+class AllGenesFarMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, tous les gènes sont modifiés loin de leur valeur actuelle selon le domaine.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Mutate All Genes (Far)'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                for i in range(0, offsprings.shape[1]):
+                    offspring[i] += self._rng.choice([domains.random_value(i) * 0.9, domains.random_value(i) * -0.9])
+        
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+
+
+class SingleCloseMutationStrategy(MutationStrategy):
+    '''
+    Lorsqu'une mutation a lieu, un seul gène est généré près de sa valeur actuelle selon le domaine. Le gène modifié est déterminé aléatoirement parmi tous les gènes.
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def name():
+        return 'Mutate Single Gene (Close)'
+
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                index = self._rng.integers(0, offsprings.shape[1])
+                offspring[index] += self._rng.choice([domains.random_value(index) * 0.1, domains.random_value(index) * -0.1])
+        
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+
+
+
 class DoubleGeneMutationStrategy(MutationStrategy):
     '''
     Lorsqu'une mutation a lieu, deux gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
@@ -176,17 +271,14 @@ class DoubleGeneMutationStrategy(MutationStrategy):
     def mutate(self, offsprings, mutation_rate, domains):
         def do_mutation(offspring, mutation_rate, domains):
             if self._rng.random() <= mutation_rate:
-                index1 = self._rng.integers(0, offsprings.shape[1])
-                index2 = self._rng.integers(0, offsprings.shape[1])
-                while index1 == index2:
-                    index2 = self._rng.integers(0, offsprings.shape[1])
+                index1, index2 = self._rng.integers(0, offsprings.shape[1], 2)
                 offspring[index1] = domains.random_value(index1)
                 offspring[index2] = domains.random_value(index2)
 
         
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
         
-class AllGenesMutationStrategy(MutationStrategy):
+class AllGenesRandomMutationStrategy(MutationStrategy):
     '''
     Lorsqu'une mutation a lieu,  tous les gènes sont générés aléatoirement selon le domaine. Les gènes modifiés sont déterminés aléatoirement parmi tous les gènes.
     '''
@@ -589,8 +681,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__obstacles = []
         self.update_obstacles(self.__obstacle_count_sb.value * self.__obstacle_count_sb.step_value)
         self.draw_obstacles()
-        self.draw_shape(self.__panel_thumbnail)
-        # self.draw_shape(self.__current_shape, self.__image_viewer)
+        self.draw_thumbnail(self.__panel_thumbnail)
 
         # connections
         self.__obstacle_count_sb.valueChanged.connect(self.generate_obstacles)
@@ -602,7 +693,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     @Slot()    
     def update_shape(self, value):
         self.change_shape(value)
-        self.draw_shape(self.__panel_thumbnail)
+        self.draw_thumbnail(self.__panel_thumbnail)
 
     def change_shape(self, value):
 
@@ -629,7 +720,6 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         if fill:
             self.__visualization_img.fill(QColor(0,0,0,255))
         painter = QPainter(self.__visualization_img)
-        # painter.fill_rect(0,0, self.__conteneur.width, self.__conteneur.height, "black")
         pen = QPen(QColor(255,255,255,255))
         painter.set_pen(pen)
         for obstacle in self.__obstacles:
@@ -641,7 +731,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(self.__current_shape, self.__obstacles, self.__conteneur))
 
-    def draw_shape(self, canevas:QImageViewer, img=None, shape=None):
+    def draw_thumbnail(self, canevas:QImageViewer, img=None, shape=None):
         temp_shape = None
     
         if img is None:
@@ -681,9 +771,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
                 transformation.rotate(rotation)
                 transformation.scale(scaling, scaling)
                 shape = transformation.map(self.__current_shape)
-                #self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__visualization_img, shape)
                 painter.draw_polygon(shape)
-
 
             shape_stats = ga.history.best_solution
             transformation = QTransform()
@@ -697,12 +785,12 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
             shape = transformation.map(self.__current_shape)
             shape = shape.to_polygon()
             pen = QPen(QColor(0,255,0,255))
+            brush = QBrush(QColor(0,127,0,255))
             pen.set_width(2)
+            painter.set_brush(brush)
             painter.set_pen(pen)
             painter.draw_polygon(shape)
             self.__qx_visualization_panel.image_viewer.image = self.__visualization_img
-
-            #self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__visualization_img, shape)
 
             painter.end()
 

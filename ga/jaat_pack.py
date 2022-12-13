@@ -96,13 +96,12 @@ class ShapeTransformationFE(FE):
         rotation = data[2]
         scaling = data[3]
         
-        polygone = self.__polygone
         transformation = QTransform()
         transformation.translate(translation_x, translation_y)
         transformation.rotate(rotation)
         transformation.scale(scaling, scaling)
         
-        polygone = transformation.map(polygone)
+        polygone = transformation.map(self.__polygone)
                        
         for obstacle in self.__obstacles:
             if polygone.contains_point(obstacle, Qt.OddEvenFill):
@@ -604,8 +603,9 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         for _ in range(self.__obstacle_count_sb.step_value * value):
             self.__obstacles.append(QPointF(random.randrange(0,self.__conteneur.width() + 1),random.randrange(0,self.__conteneur.height() + 1)))
 
-    def draw_obstacles(self):
-        self.__visualization_img.fill(QColor(0,0,0,255))
+    def draw_obstacles(self, fill: bool = True):
+        if fill:
+            self.__visualization_img.fill(QColor(0,0,0,255))
         painter = QPainter(self.__visualization_img)
         # painter.fill_rect(0,0, self.__conteneur.width, self.__conteneur.height, "black")
         pen = QPen(QColor(255,255,255,255))
@@ -619,28 +619,67 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(self.__current_shape, self.__obstacles, self.__conteneur))
 
-    def draw_shape(self, canevas:QImageViewer, img = None):
+    def draw_shape(self, canevas:QImageViewer, img=None, shape=None):
+        temp_shape = None
+    
         if img is None:
             img = QImage(161, 100, QImage.Format_ARGB32)
             temp_shape = self.__current_shape
             transform = QTransform()
-            transform.scale(0.1,0.1)
+            transform.scale(0.2,0.2)
             temp_shape = transform.map(temp_shape)
             self.__thumbnail_img = img
             
 
-        self.__thumbnail_img.fill(QColor(0,0,0,255))
-        painter = QPainter(self.__thumbnail_img)
+        img.fill(QColor(0,0,0,255))
+        painter = QPainter(img)
         pen = QPen(QColor(128,0,128,255))
         painter.set_pen(pen)
-        painter.draw_polygon(self.__current_shape if not temp_shape else temp_shape)
-        canevas.image = self.__thumbnail_img
+        painter.draw_polygon(shape if not temp_shape else temp_shape)
+        canevas.image = img
         painter.end()
     
     def draw_on_canvas(self, ga=None):
+
+        self.__visualization_img.fill(QColor(0,0,0,255))
+        self.draw_obstacles(fill=False)
+        painter = QPainter(self.__visualization_img)
+        pen = QPen(QColor(128,0,128,255))
+        painter.set_pen(pen)
+
         if ga:
-            self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__visualization_img)
-        self.draw_obstacles()
+            for unit in ga.population:
+                transformation = QTransform()
+                translation_x = unit[0]
+                translation_y = unit[1]
+                rotation = unit[2]
+                scaling = unit[3]
+                transformation.translate(translation_x, translation_y)
+                transformation.rotate(rotation)
+                transformation.scale(scaling, scaling)
+                shape = transformation.map(self.__current_shape)
+                #self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__visualization_img, shape)
+                painter.draw_polygon(shape)
+
+
+            shape_stats = ga.history.best_solution
+            transformation = QTransform()
+            translation_x = shape_stats[0]
+            translation_y = shape_stats[1]
+            rotation = shape_stats[2]
+            scaling = shape_stats[3]
+            transformation.translate(translation_x, translation_y)
+            transformation.rotate(rotation)
+            transformation.scale(scaling, scaling)
+            shape = transformation.map(self.__current_shape)
+            shape = shape.to_polygon()
+            shape.fill = QColor(0,255,0,255)
+            painter.draw_polygon(shape)
+            self.__qx_visualization_panel.image_viewer.image = self.__visualization_img
+
+            #self.draw_shape(self.__qx_visualization_panel.image_viewer, self.__visualization_img, shape)
+
+            painter.end()
 
 
 

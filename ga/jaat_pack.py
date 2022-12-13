@@ -311,9 +311,10 @@ class AlwaysMutateScale(MutationStrategy):
     def mutate(self, offsprings, mutation_rate, domains):
         def do_mutation(offspring, mutation_rate, domains):
             if self._rng.random() <= mutation_rate:
-                index = self._rng.integers(0, offsprings.shape[1])
-                offspring[index] = domains.random_value(index)
-                offspring[3] = domains.random_value(3)
+                if offsprings.shape[1] > 3:
+                    index = self._rng.integers(0, offsprings.shape[1] - 1)
+                    offspring[index] = domains.random_value(index)
+                    offspring[3] = domains.random_value(3)
             
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 # ------------------------------------------------------------------------------------------ 
@@ -645,8 +646,20 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
 
         self.__conteneur = QRectF(0,0,640,400)
         self.__rectangle = QPolygonF(QRectF(0,0, self.__conteneur.width(), self.__conteneur.height()))
+        rectangle_bb = self.__rectangle.bounding_rect()
+        rectangle_center = rectangle_bb.center()
+        self.__rectangle.translate(-rectangle_center.x(), -rectangle_center.y())
+        
         self.__triangle = QPolygonF([QPointF(0,0), QPointF(self.__conteneur.width(), 0), QPointF(self.__conteneur.width() / 2, self.__conteneur.height())])
+        triangle_bb = self.__triangle.bounding_rect()
+        triangle_center = triangle_bb.center()
+        self.__triangle.translate(-triangle_center.x(), -triangle_center.y())
+        
         self.__porygon = QPolygonF([QPointF(0,85), QPointF(15,80), QPointF(190,215), QPointF(310,140), QPointF(230,125), QPointF(200,60), QPointF(245,10), QPointF(370,5), QPointF(480,35), QPointF(640,125), QPointF(640,140), QPointF(580,145), QPointF(425,150), QPointF(530, 235), QPointF(495,280), QPointF(570, 325), QPointF(600, 385), QPointF(580, 395), QPointF(380,365), QPointF(370, 345), QPointF(275, 360), QPointF(260,345), QPointF(185,365), QPointF(55,375), QPointF(25, 365), QPointF(70,300), QPointF(115,260), QPointF(0,95)])
+        porygon_bb = self.__porygon.bounding_rect()
+        porygon_center = porygon_bb.center()
+        self.__porygon.translate(-porygon_center.x(), -porygon_center.y())
+        
         self.__current_shape = self.__rectangle
         
         self.__shape_combobox = QComboBox()

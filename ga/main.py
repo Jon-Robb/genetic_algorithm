@@ -19,8 +19,7 @@ def main():
     # ga_app.add_crossover_strategy(my_awesome_strategy)
     ga_app.add_mutation_strategy(DoubleGeneMutationStrategy)
     ga_app.add_mutation_strategy(AllGenesMutationStrategy)
-    ga_app.add_mutation_strategy(TwoAxisSingleGeneMutationStrategy)
-
+    ga_app.add_mutation_strategy(AlwaysMutateScale)
 
     # --------------------------------------------------------
     # <Votre code ici>

@@ -207,25 +207,22 @@ class AllGenesMutationStrategy(MutationStrategy):
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
         
         
-class TwoAxisSingleGeneMutationStrategy(MutationStrategy):
-    '''
-    Lorsqu'une mutation a lieu, un seul gène est généré aléatoirement selon le domaine. Le gène modifié est déterminé aléatoirement parmi tous les gènes.
-    '''
-
+class AlwaysMutateScale(MutationStrategy):
+    
     def __init__(self):
         super().__init__()
-
+        
     @staticmethod
     def name():
-        return 'Two Axis Single Mutation'
-
+        return 'Always mutate scale'
+    
     def mutate(self, offsprings, mutation_rate, domains):
         def do_mutation(offspring, mutation_rate, domains):
             if self._rng.random() <= mutation_rate:
                 index = self._rng.integers(0, offsprings.shape[1])
                 offspring[index] = domains.random_value(index)
-        
-        np.apply_along_axis(do_mutation, 0, offsprings, mutation_rate, domains)
+                offspring[3] = domains.random_value(3)
+            
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 # ------------------------------------------------------------------------------------------ 
 #  .----------------.  .----------------. 

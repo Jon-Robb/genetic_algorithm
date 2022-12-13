@@ -22,6 +22,7 @@ def main():
     ga_app.add_mutation_strategy(AllGenesRandomMutationStrategy)
     ga_app.add_mutation_strategy(SingleCloseMutationStrategy)
     ga_app.add_mutation_strategy(AllGenesCloseMutationStrategy)
+    ga_app.add_mutation_strategy(AllGenesFarMutationStrategy)
 
     # --------------------------------------------------------
     # <Votre code ici>

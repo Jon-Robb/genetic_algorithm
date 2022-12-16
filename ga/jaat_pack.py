@@ -385,9 +385,10 @@ class ScrollValue(QWidget):
     
     valueChanged = Signal(int)
     
-    def __init__(self, title:str, range:tuple, fixed_widget_length:int = 50,init:int=None, parent=None, step_value:int=1):
+    def __init__(self, title:str, range:tuple, fixed_widget_length:int = 50,init:int=None, parent=None, step_value:int=1, prefix:str='', suffix:str=''):
         super().__init__(parent)
-
+        self.__prefix = prefix
+        self.__suffix = suffix
         
         self.tool_tip = 'Valeur de ' + title
         
@@ -412,7 +413,7 @@ class ScrollValue(QWidget):
         
         self.__value_label.set_fixed_width(fixed_widget_length)
         self.__value_label.alignment = Qt.AlignCenter
-        self.__value_label.set_num(init*step_value)
+        self.update(init)
         
         self.__sb.valueChanged.connect(self.update)
         self.__sb.valueChanged.connect(self.valueChanged)
@@ -427,9 +428,8 @@ class ScrollValue(QWidget):
         
         self.set_contents_margins(0, 0, 0, 0)
     
-
     def update(self, value:int):
-        self.__value_label.set_num(value * self.__step_value)
+        self.__value_label.text = self.__prefix + str(value*self.__step_value) + " " + self.__suffix
 
     @Slot()
     def set_value(self, value):
@@ -468,8 +468,8 @@ class ScrollValue(QWidget):
         self.__sb = val
         
 class ScrollValueButton(ScrollValue):
-    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = 50, parent=None, step_value: int = 1):
-        super().__init__(title, range, fixed_widget_length, init, parent, step_value)
+    def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = 50, parent=None, step_value: int = 1, prefix: str = '', suffix: str = ''):
+        super().__init__(title, range, fixed_widget_length, init, parent, step_value, prefix, suffix)
         self.__init = init
         self.__button = QPushButton("!");
         self.__button.set_fixed_width(fixed_widget_length/2)
@@ -683,7 +683,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]     
         self.__width_height_form_layout = QxForm(self.__form_list)
         
-        self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50)
+        self.__obstacle_count_sb = ScrollValueButton("Obstacle Count : ", (0, 100),100, 50, suffix="obstacles")
         self.__generate_obstacle_btn = QPushButton("Generate Obstacle")
 
         self.__conteneur = QRectF(0,0,640,400)
@@ -854,14 +854,14 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
 
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
-    def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Shape shift description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
+    def __init__(self, name: str = "Image cloning problem", summary: str = "Image cloning summary", description: str = "Image cloning description",  default_parameters: Parameters = Parameters(), parent: QWidget = None):
         self.__width_label = QLabel("-")
         self.__height_label = QLabel("-")
         
         self.__form_list = [("Width : ",self.__width_label),("Height : ",self.__height_label)]
         self.__width_height_form_layout = QxForm(self.__form_list)        
         
-        self.__pixels_count_sb = ScrollValueButton("Image scale : ", (0, 200), 100, 100)
+        self.__pixels_count_sb = ScrollValueButton("Image scale : ", (0, 200), 100, 100, suffix="%")
         
         self.__image_combobox = QComboBox() 
         self.__image_directory = "ga/images/"

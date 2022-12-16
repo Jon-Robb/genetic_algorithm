@@ -31,12 +31,16 @@ class Utils():
     def clamp_max(value, max):
         return min(value, max)
     
+    def clamp_min(value, min):
+        return max(value, min)
+    
     def readfile(filename:str)->list:
         data = []
         with open(filename, 'r') as file:
             for line in file:
                 data.append(line)
         return data
+    
 
 #  .----------------. 
 # | .--------------. |
@@ -209,7 +213,7 @@ class AllGenesCloseMutationStrategy(MutationStrategy):
         def do_mutation(offspring, mutation_rate, domains):
             if self._rng.random() <= mutation_rate:
                 for i in range(0, offsprings.shape[1]):
-                    offspring[i] += self._rng.choice([domains.random_value(i) * 0.1, domains.random_value(i) * -0.1])
+                    offspring[i] += self._rng.choice([domains.random_value(i) * 0.01, domains.random_value(i) * -0.01])
         
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 
@@ -255,6 +259,61 @@ class SingleCloseMutationStrategy(MutationStrategy):
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 
 
+class MutateAllGenesThirdGrowsOnly(MutationStrategy):
+    def __init__(self):
+        super().__init__()
+        
+    @staticmethod
+    def name():
+        return 'Mutate All Genes (Third Grows Only)'
+        
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                for i in range(0, offsprings.shape[1]):
+                    if i == 3:
+                        offspring[i] += domains.random_value(i) 	             
+                    else:
+                        offspring[i] = domains.random_value(i)
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
+class ShapeTransformationUltimateMutationStrategy(MutationStrategy):
+    def __init__(self):     
+        super().__init__()
+        
+        self.__third_grows_only = MutateAllGenesThirdGrowsOnly()
+        self.__all_genes_close = AllGenesCloseMutationStrategy()
+        
+    @staticmethod
+    def name():
+        return 'Shape Transformation Ultimate Mutation Strategy'
+   
+    def mutate(self, offsprings, mutation_rate, domains):
+        if self._rng.random() <= 0.5:
+            self.__third_grows_only.mutate(offsprings, mutation_rate, domains)        
+        else:
+            self.__all_genes_close.mutate(offsprings, mutation_rate, domains)
+            
+            
+            
+class ImageCloningUltimateMutationStrategy(MutationStrategy):
+    def __init__(self):
+        super().__init__()
+        
+        self.__old_values = None
+        
+    @staticmethod
+    def name():
+        return 'Image Cloning Ultimate Mutation Strategy'
+        
+    def mutate(self, offsprings, mutation_rate, domains):
+        def do_mutation(offspring, mutation_rate, domains):
+            if self._rng.random() <= mutation_rate:
+                pass
+            
+            
+            self.__old_values = np.copy(offspring)
+        np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
 
 class DoubleGeneMutationStrategy(MutationStrategy):
     '''
@@ -747,9 +806,9 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def draw_on_canvas(self, ga=None):
 
         self.__visualization_img.fill(QColor(0,0,0,255))
-        self.draw_obstacles(fill=False)
         painter = QPainter(self.__visualization_img)
         pen = QPen(QColor(128,0,128,255))
+
         pen.set_width(2)
         painter.set_pen(pen)
 
@@ -785,7 +844,11 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
             painter.draw_polygon(shape)
             self.__qx_visualization_panel.image_viewer.image = self.__visualization_img
 
+
             painter.end()
+            
+        self.draw_obstacles(fill=False)
+
 
 
 

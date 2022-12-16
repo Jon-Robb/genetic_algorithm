@@ -24,7 +24,7 @@ def main():
     ga_app.add_mutation_strategy(AllGenesFarMutationStrategy)
     ga_app.add_mutation_strategy(MutateAllGenesThirdGrowsOnly)
     ga_app.add_mutation_strategy(ShapeTransformationUltimateMutationStrategy)
-
+    ga_app.add_mutation_strategy(ImageCloningUltimateMutationStrategy)
 
     # --------------------------------------------------------
     # <Votre code ici>

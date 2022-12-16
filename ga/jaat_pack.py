@@ -19,8 +19,7 @@ from pathlib import Path
 # |  |  |  | `---|  |----`|  | |  |     |  | `---|  |----`|  | |  |__     |   (----`
 # |  |  |  |     |  |     |  | |  |     |  |     |  |     |  | |   __|     \   \    
 # |  `--'  |     |  |     |  | |  `----.|  |     |  |     |  | |  |____.----)   |   
-#  \______/      |__|     |__| |_______||__|     |__|     |__| |_______|_______/    
-                                                                                                                                          
+#  \______/      |__|     |__| |_______||__|     |__|     |__| |_______|_______/                                                                                                                                           
 class Utils():
     """
     This class contains a method used to clamp a value between a min and max value.
@@ -41,6 +40,13 @@ class Utils():
                 data.append(line)
         return data
     
+    def transform_shape(shape:QPolygonF, translation_x, translation_y, rotation, scaling):
+        transformation = QTransform()
+        transformation.translate(translation_x, translation_y)
+        transformation.rotate(rotation)
+        transformation.scale(scaling, scaling)
+        return transformation.map(shape)
+        
 
 #  .----------------. 
 # | .--------------. |
@@ -71,6 +77,7 @@ class FE():
 
     def __call__(self):
         return self.fitness_evaluation()
+    
 
 class OpenBoxFE(FE):
 
@@ -113,24 +120,13 @@ class ShapeTransformationFE(FE):
         self.__polygone = polygone
         self.__obstacles = obstacles
         self.__container = container
-        # self.__array = self.create_image()
-        # self.randomize(self.__array, 0.5)
         
     def __call__(self, data):
         return self.fitness_evaluation(data)    
     
     def fitness_evaluation(self, data):
-        translation_x = data[0]
-        translation_y = data[1]
-        rotation = data[2]
-        scaling = data[3]
-        
-        transformation = QTransform()
-        transformation.translate(translation_x, translation_y)
-        transformation.rotate(rotation)
-        transformation.scale(scaling, scaling)
-        
-        polygone = transformation.map(self.__polygone)
+      
+        polygone = Utils.transform_shape(self.__polygone, data[0], data[1], data[2], data[3])
                        
         for obstacle in self.__obstacles:
             if polygone.contains_point(obstacle, Qt.OddEvenFill):
@@ -139,24 +135,13 @@ class ShapeTransformationFE(FE):
             return 0
         
         return area_from_QPolygonF(polygone)
+    
         
-    
-    
-    # def randomize(self, image, percent=0.5):
-    #     rng = np.random.default_rng()
-    #     image[:] = (rng.random((image.shape)) <= percent).astype(image.dtype)
-    
-    # def create_image(self):
-    #     return np.zeros((self.__width, self.__height), dtype=np.uint8)
-    
-    
-
 class ImageCloningFE(FE):
     def __init__(self, image_array:np.ndarray=None):
         
         self.__image_array = image_array
-        
-        
+            
     def __call__(self, data):
         return self.fitness_evaluation(data)
     
@@ -167,10 +152,7 @@ class ImageCloningFE(FE):
         
         return abs(distance - max_distance)
         
-        
-        
-        
-        
+               
 # ------------------------------------------------------------------------------------------ 
 #   _____ _             _             _           
 #  / ____| |           | |           (_)          
@@ -190,18 +172,11 @@ class ImageCloningFE(FE):
 # |  |   |  | |_| | || (_| | |_| | (_) | | | |
 # `--'   `--'\__,_|\__\__,_|\__|_|\___/|_| |_|
 # ------------------------------------------------------------------------------------------
-
-class ExploreAndFocusMutationStrategy(MutationStrategy):
-    '''
-    Combine la mutation de l'exploration et de la concentration.
-
-    '''
-
 class AllGenesCloseMutationStrategy(MutationStrategy):
     '''
     Lorsqu'une mutation a lieu, tous les gènes sont modifiés près de leur valeur actuelle selon le domaine.
     '''
-
+    
     def __init__(self):
         super().__init__()
 
@@ -216,6 +191,7 @@ class AllGenesCloseMutationStrategy(MutationStrategy):
                     offspring[i] += self._rng.choice([domains.random_value(i) * 0.01, domains.random_value(i) * -0.01])
         
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
 
 class AllGenesFarMutationStrategy(MutationStrategy):
     '''
@@ -277,6 +253,7 @@ class MutateAllGenesThirdGrowsOnly(MutationStrategy):
                         offspring[i] = domains.random_value(i)
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
         
+        
 class ShapeTransformationUltimateMutationStrategy(MutationStrategy):
     def __init__(self):     
         super().__init__()
@@ -293,15 +270,12 @@ class ShapeTransformationUltimateMutationStrategy(MutationStrategy):
             self.__third_grows_only.mutate(offsprings, mutation_rate, domains)        
         else:
             self.__all_genes_close.mutate(offsprings, mutation_rate, domains)
-            
-            
+                       
             
 class ImageCloningUltimateMutationStrategy(MutationStrategy):
     def __init__(self):
         super().__init__()
-        
-        self.__old_values = None
-        
+              
     @staticmethod
     def name():
         return 'Image Cloning Ultimate Mutation Strategy'
@@ -309,11 +283,11 @@ class ImageCloningUltimateMutationStrategy(MutationStrategy):
     def mutate(self, offsprings, mutation_rate, domains):
         def do_mutation(offspring, mutation_rate, domains):
             if self._rng.random() <= mutation_rate:
-                pass
-            
-            
-            self.__old_values = np.copy(offspring)
+                mutating_genes = np.random.choice([True, False], offspring.shape[0], p=[1, 0])
+                offspring = np.where(mutating_genes == True, domains.random_values(), offspring)                
+          
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
 
 class DoubleGeneMutationStrategy(MutationStrategy):
     '''
@@ -333,9 +307,9 @@ class DoubleGeneMutationStrategy(MutationStrategy):
                 index1, index2 = self._rng.integers(0, offsprings.shape[1], 2)
                 offspring[index1] = domains.random_value(index1)
                 offspring[index2] = domains.random_value(index2)
-
-        
+       
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
+        
         
 class AllGenesRandomMutationStrategy(MutationStrategy):
     '''
@@ -358,7 +332,6 @@ class AllGenesRandomMutationStrategy(MutationStrategy):
         np.apply_along_axis(do_mutation, 1, offsprings, mutation_rate, domains)
         
         
-
 # ------------------------------------------------------------------------------------------ 
 #  .----------------.  .----------------. 
 # | .--------------. || .--------------. |
@@ -783,58 +756,37 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=("translation_x", "translation_y", "rotation", "scaling")), fitness=ShapeTransformationFE(self.__current_shape, self.__obstacles, self.__conteneur))
 
-    def draw_thumbnail(self, canevas:QImageViewer, img=None, shape=None):
-        temp_shape = None
-    
-        if img is None:
-            img = QImage(161, 100, QImage.Format_ARGB32)
-            temp_shape = self.__current_shape
-            transform = QTransform()
-            transform.scale(0.2,0.2)
-            temp_shape = transform.map(temp_shape)
-            self.__thumbnail_img = img
+    def draw_thumbnail(self, canevas:QImageViewer):
+     
+        img = QImage(161, 100, QImage.Format_ARGB32)
+        temp_shape = self.__current_shape
+        transform = QTransform()
+        transform.scale(0.2,0.2)
+        temp_shape = transform.map(temp_shape)
+        self.__thumbnail_img = img
             
-
         img.fill(QColor(0,0,0,255))
         painter = QPainter(img)
         pen = QPen(QColor(128,0,128,255))
         painter.set_pen(pen)
-        painter.draw_polygon(shape if not temp_shape else temp_shape)
+        painter.draw_polygon(temp_shape)
         canevas.image = img
         painter.end()
     
     def draw_on_canvas(self, ga=None):
 
         self.__visualization_img.fill(QColor(0,0,0,255))
-        painter = QPainter(self.__visualization_img)
-        pen = QPen(QColor(128,0,128,255))
-
-        pen.set_width(2)
-        painter.set_pen(pen)
 
         if ga:
+            painter = QPainter(self.__visualization_img)
+            pen = QPen(QColor(128,0,128,255))
+            pen.set_width(2)
+            painter.set_pen(pen)
             for unit in ga.population:
-                transformation = QTransform()
-                translation_x = unit[0]
-                translation_y = unit[1]
-                rotation = unit[2]
-                scaling = unit[3]
-                transformation.translate(translation_x, translation_y)
-                transformation.rotate(rotation)
-                transformation.scale(scaling, scaling)
-                shape = transformation.map(self.__current_shape)
+                shape = Utils.transform_shape(self.__current_shape, unit[0], unit[1], unit[2], unit[3])
                 painter.draw_polygon(shape)
 
-            shape_stats = ga.history.best_solution
-            transformation = QTransform()
-            translation_x = shape_stats[0]
-            translation_y = shape_stats[1]
-            rotation = shape_stats[2]
-            scaling = shape_stats[3]
-            transformation.translate(translation_x, translation_y)
-            transformation.rotate(rotation)
-            transformation.scale(scaling, scaling)
-            shape = transformation.map(self.__current_shape)
+            shape = Utils.transform_shape(self.__current_shape, ga.history.best_solution[0], ga.history.best_solution[1], ga.history.best_solution[2], ga.history.best_solution[3])
             shape = shape.to_polygon()
             pen = QPen(QColor(0,255,0,255))
             brush = QBrush(QColor(0,127,0,255))
@@ -848,6 +800,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
             painter.end()
             
         self.draw_obstacles(fill=False)
+
 
 
 

@@ -391,7 +391,6 @@ class ScrollValue(QWidget):
         self.__sb.valueChanged.connect(self.update)
         self.__sb.valueChanged.connect(self.valueChanged)
 
-
         layout = QHBoxLayout()
         layout.add_widget(title_label)
         layout.add_widget(self.__sb)
@@ -440,17 +439,18 @@ class ScrollValue(QWidget):
     def sb(self, val):
         self.__sb = val
         
+        
 class ScrollValueButton(ScrollValue):
     def __init__(self, title: str, range: tuple, fixed_widget_length: int = 50, init: int = 50, parent=None, step_value: int = 1, prefix: str = '', suffix: str = ''):
         super().__init__(title, range, fixed_widget_length, init, parent, step_value, prefix, suffix)
+        
         self.__init = init
         self.__button = QPushButton("!");
         self.__button.set_fixed_width(fixed_widget_length/2)
-        # self.__button.tool_tip = f'Reset to default value : {value_prefix}{init_val:{format_string}}{value_suffix}'
         self.__button.tool_tip = f'Reset to default value : {init}'
-        # self.__button.connect(self.set_value)
         self.__button.clicked.connect(lambda : self.set_value(self.__init))
         self.layout().add_widget(self.__button)
+        
 
 class QxVerticalControlPanel(QGroupBox):
     def __init__(self, layout:Optional[QVBoxLayout]= None,title="Paramètres", menus:list[QWidget]=None, width:int=None, parent=None):
@@ -467,25 +467,22 @@ class QxVerticalControlPanel(QGroupBox):
                 self.__layout.add_widget(self.__q_widgets[i])
         self.__layout.add_stretch(1)
         
+        
 class QxVisualizationPanel(QGroupBox):
     
     def __init__(self, parent=None):
         super().__init__(parent=parent, title='Visualisation')
 
         self.__layout = QVBoxLayout(self)
-        self.__layout.content_margins = (0, 0, 0, 0)
-        
-       
+        self.__layout.content_margins = (0, 0, 0, 0) 
         
         self.__image_viewer = QImageViewer()
         self.__layout.add_widget(self.__image_viewer)
         
-   
     @property
     def image(self):
         return self.__image_viewer.image
-    
-    
+       
     @image.setter
     def image(self, img):
         self.__image_viewer.image = img
@@ -516,7 +513,6 @@ class QxForm(QWidget):
 #                       |_|                                   
 # ------------------------------------------------------------------------------------------ 
 class QxSolutionPanelFrame(QSolutionToSolvePanel):
-
     def __init__(   self,
                     name : str="A name",
                     summary : str="A summary",
@@ -526,7 +522,6 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
                     vertical_control_panel : QxVerticalControlPanel=None,
                     visualisation_panel : QxVisualizationPanel=None,
                     parent : QWidget=None):
-
         super().__init__(parent)
         
         self.__name = name
@@ -570,15 +565,13 @@ class QxSolutionPanelFrame(QSolutionToSolvePanel):
             self.draw_on_canvas() 
         else:
             self.draw_on_canvas(ga)
-                
-
-    
+                   
     @abstractmethod
     def draw_on_canvas(self, data=None):
         pass
-
-class QxOpenBoxPanel(QxSolutionPanelFrame):
     
+
+class QxOpenBoxPanel(QxSolutionPanelFrame):    
     def __init__(   self,
                     name: str = "Box Problem",
                     summary: str = "Box problem summary",
@@ -601,7 +594,6 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         self.draw_on_canvas()
         
         super().__init__(name, summary, description, self.__default_parameters, np.asarray([[0, min(self.__widthscrollbar.value, self.__heightscrollbar.value) / 2]], np.float16), self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
-        # self.problem_definition.domains.ranges = np.asarray([0, int(min(self.__widthscrollbar.value, self.__heightscrollbar.value)) / 2], np.uint16)
 
     @property
     def problem_definition(self):
@@ -609,8 +601,6 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
 
     def draw_on_canvas(self, ga=None):
        
-        # canvas_width = 400
-        # canvas_height = 400
         canvas_width = self.__widthscrollbar.value
         canvas_height = self.__heightscrollbar.value
         
@@ -622,8 +612,7 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         img.fill(QColor(0,0,0,0))
         painter = QPainter(img)
         painter.fill_rect(box_offset_x, box_offset_y,box_width,box_height,"blue")
-
-        
+      
         if ga is not None:
             for unit in ga.population:
                 cut_lenght = unit[0]
@@ -644,12 +633,9 @@ class QxOpenBoxPanel(QxSolutionPanelFrame):
         painter.end()
         
         
-class QxShapeTransformationPanel(QxSolutionPanelFrame):
-    
-    
+class QxShapeTransformationPanel(QxSolutionPanelFrame):   
     def __init__(self, name: str = "Shape shift problem", summary: str = "Shape shift summary", description: str = "Shape shift description", default_parameters: Parameters = Parameters(), parent: QWidget = None):
-        
-        
+               
         self.__width_label = QLabel("640")
         self.__height_label = QLabel("400")
         
@@ -683,7 +669,6 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         self.__shape_form_layout = QxForm([("Shape : ", self.__shape_combobox)])
         self.__panel_thumbnail = QImageViewer()
         self.__panel_thumbnail.minimum_height = 200
-        # self.__img_label = QLabel()
         
         self.__temp_ranges = np.asarray([[0, 650], 
                                   [0, 500],
@@ -796,14 +781,9 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
             painter.draw_polygon(shape)
             self.__qx_visualization_panel.image_viewer.image = self.__visualization_img
 
-
             painter.end()
             
         self.draw_obstacles(fill=False)
-
-
-
-
 
 
 class QxImageCloningPanel(QxSolutionPanelFrame):
@@ -820,10 +800,9 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__image_directory = "ga/images/"
         self.__arr_of_image_files = listdir(self.__image_directory)
         self.__arr_of_image = []
+        
         for i in self.__arr_of_image_files:
-            if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg"):
-                # On enlève l'extension
-                # i = i.split(".")[0]
+            if i.endswith(".webp") or i.endswith(".png") or i.endswith(".jpg") or i.endswith(".jpeg"):   
                 self.__arr_of_image.append(i)
                 
         self.__image = self.__arr_of_image[0]
@@ -834,20 +813,13 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
         self.__image_label.set_fixed_width(100)
         self.__image_label.set_fixed_height(100)
         
-
-
- 
-
         # add image to label
-
-        self.__image_combobox.currentTextChanged.connect(self.text_changed)
-        
+        self.__image_combobox.currentTextChanged.connect(self.text_changed)     
         self.__load_image(self.__arr_of_image_files[0])
         
         self.__menu = [self.__width_height_form_layout,self.__pixels_count_sb,self.__image_form_layout,self.__image_label]
         
-        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)
-        
+        self.__qx_vertical_control_panel = QxVerticalControlPanel(menus=self.__menu)       
         self.__qx_visualization_panel  = QxVisualizationPanel()
         
         super().__init__(name, summary, description, default_parameters, self.__temp_ranges, self.__qx_vertical_control_panel, self.__qx_visualization_panel, parent)
@@ -890,12 +862,11 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
                     self.__domain_names.append("G of pixel " + str(i))
                 else:
                     self.__domain_names.append("B of pixel " + str(i))
-    
-    
-    
+      
     def setting_image(self, text):
         newPixmap = QPixmap(self.__image_directory + text)
         self.__image_label.set_pixmap(newPixmap)
+        
     @property
     def problem_definition(self):
         return ProblemDefinition(domains=Domains(ranges=self.__temp_ranges, names=self.__domain_names), fitness=ImageCloningFE(np.array(self.__image).flatten()))
@@ -926,12 +897,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
 #                             |___/ 
 # ------------------------------------------------------------------------------------------ 
 if __name__ == "__main__":
-
-    p = FE()
-    print(p())
-
-    # obp = OpenBoxFE(50, 100)
-    # print(obp((14.25634434,0)))
     
-    shape_shift = ShapeTransformationFE(50)
+    print("Did you mean to run main.py?")
+    
 # ------------------------------------------------------------------------------------------ 

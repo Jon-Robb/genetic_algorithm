@@ -14,9 +14,6 @@ def main():
     app = QApplication(sys.argv)
     ga_app = gaapp.QGAApp()
 
-    # --------------------------------------------------------
-    # ajout de vos stratégies (exemple) :
-    # ga_app.add_crossover_strategy(my_awesome_strategy)
     ga_app.add_mutation_strategy(DoubleGeneMutationStrategy)
     ga_app.add_mutation_strategy(AllGenesRandomMutationStrategy)
     ga_app.add_mutation_strategy(SingleCloseMutationStrategy)
@@ -25,18 +22,7 @@ def main():
     ga_app.add_mutation_strategy(MutateAllGenesThirdGrowsOnly)
     ga_app.add_mutation_strategy(ShapeTransformationUltimateMutationStrategy)
     ga_app.add_mutation_strategy(ImageCloningUltimateMutationStrategy)
-
-    # --------------------------------------------------------
-    # <Votre code ici>
-    
-    # --------------------------------------------------------
-    # ajout de vos panneaux de résolution de problème (exemple) :
-    # ga_app.add_solution_panel(QxOpenBoxPanel())
-    # ga_app.add_solution_panel(QxShapeTransformationPanel())
-    # ga_app.add_solution_panel(QxImageCloningPanel())
-    # --------------------------------------------------------
-    # <Votre code ici>
-    
+ 
     open_box_problem = QxOpenBoxPanel()
     shape_transformation_problem = QxShapeTransformationPanel()
     image_cloning_problem = QxImageCloningPanel()

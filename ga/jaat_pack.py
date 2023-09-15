@@ -14,6 +14,7 @@ from PIL.ImageQt import ImageQt
 from os import listdir, path
 from pathlib import Path
 
+from __feature__ import snake_case, true_property
 #  __    __  .___________. __   __       __  .___________. __   _______     _______.
 # |  |  |  | |           ||  | |  |     |  | |           ||  | |   ____|   /       |
 # |  |  |  | `---|  |----`|  | |  |     |  | `---|  |----`|  | |  |__     |   (----`
@@ -374,7 +375,7 @@ class ScrollValue(QWidget):
         self.__sb = QScrollBar()
         self.__value_label = QLabel()
 
-        title_label.set_text(title)
+        title_label.text = title
         title_label.set_fixed_width(fixed_widget_length)
 
         self.__sb.minimumWidth = 2 * fixed_widget_length

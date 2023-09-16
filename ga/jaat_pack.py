@@ -751,6 +751,7 @@ class QxShapeTransformationPanel(QxSolutionPanelFrame):
         temp_shape = transform.map(temp_shape)
         self.__thumbnail_img = img
             
+
         img.fill(QColor(0,0,0,255))
         painter = QPainter(img)
         pen = QPen(QColor(128,0,128,255))
@@ -866,7 +867,7 @@ class QxImageCloningPanel(QxSolutionPanelFrame):
       
     def setting_image(self, text):
         newPixmap = QPixmap(self.__image_directory + text)
-        self.__image_label.set_pixmap(newPixmap)
+        self.__image_label.pixmap = newPixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.FastTransformation)
         
     @property
     def problem_definition(self):

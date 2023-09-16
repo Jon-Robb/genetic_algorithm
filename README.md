@@ -72,6 +72,9 @@
 [![VSCode][vscode-img]][vscode-url]
 [![Python][python-img]][python-url]
 [![Pillow][pillow-img]][pillow-url]
+[![Qt][qt-img]][qt-url]
+[![Pyside6][Pyside6-img]][Pyside6-url]
+[![Numpy][numpy-img]][numpy-url]
 
 
 <!-- USAGE EXAMPLES -->
@@ -112,25 +115,28 @@ You need to have python installed, if not you can download it here: [https://www
 
 
 <br/>
-<h3 align="center"> Entry Screen </h3>
+<h3 align="center"> Box Solution </h3>
 <p align="center">
-  <img src="./images//entering_screen.png" alt="Entering screen">
+  <img src="./images/box_solution.png" alt="Box Solution" width="1000">
 </p>
 <br/>
-<h3 align="center"> See all forces and field of view </h3>
+<h3 align="center"> Shape solution </h3>
 <p align="center">
-  <img src="./images/all_forces_shown.png" alt="All Forces Shown">
+  <img src="./images/shape_solution.png" alt="Shape Solution" width="1000">
 </p>
 <br/>
-<h3 align="center"> Click on a boid to see its stats and forces </h3>
+<h3 align="center"> Image cloning solution, watch the result come to life </h3>
 <p align="center">
-  <img src="./images/single_boid_stats.png" alt="Single boid">
+  <span> 
+  <img src="./images/image_solution_main.png" alt="Image main" width="350">
+  <img src="./images/image_solution_133.png" alt="Image 133 epoch" width="350">
+  <img src="./images/image_solution_2600.png" alt="Image 266 epoch" width="350">
+  <img src="./images/image_solution_5800.png" alt="Image 5000 epoch" width="350">
+    <img src="./images/image_solution_11248.png" alt="Image 5000 epoch" width="350">
+  <img src="./images/image_solution_15000.png" alt="Image 5000 epoch" width="350">
+   </span>
 </p>
-<br/>
-<h3 align="center"> Get a little cray cray </h3>
-<p align="center">
-  <img src="./images/crazy_mode.png" alt="Crazy mode">
-</p>
+
 <br/>
 
 
